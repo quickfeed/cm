@@ -19,6 +19,9 @@ type listReposJSON struct {
 //
 // The -url flag specifies that the URL of the repository should be printed instead of the name.
 func listRepos(args []string) {
+	if err := loadEnv(); err != nil {
+		exitErr(err, "Error loading environment variables")
+	}
 	fs := flag.NewFlagSet(cloneRepoCmd, flag.ExitOnError)
 	var url bool
 	fs.BoolVar(&url, "url", false, "Print only the URL of the repository")

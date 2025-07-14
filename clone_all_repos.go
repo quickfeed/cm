@@ -19,6 +19,9 @@ import (
 // The student/group repositories for the current year are cloned into the directory
 // <year>/student-repos/<repo>.
 func cloneAllRepos() {
+	if err := loadEnv(); err != nil {
+		exitErr(err, "Error loading environment variables")
+	}
 	// Alternative: use the GitHub CLI to list repositories:
 	// gh repo list dat520-2025 --limit 100 --json name,url
 	// gh repo list dat520-2025 --limit 100 --json name
