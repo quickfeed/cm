@@ -7,8 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/quickfeed/quickfeed/internal/env"
 )
 
 // initEnv initializes the environment variables for the course.
@@ -108,7 +106,7 @@ func exists(filename string) bool {
 // It will not override a variable that already exists in the environment.
 func loadEnv() error {
 	envFile := envFilePath()
-	if err := env.Load(envFile); err != nil {
+	if err := Load(envFile); err != nil {
 		return err
 	}
 	if err := checkRequiredEnv(); err != nil {
@@ -148,6 +146,7 @@ func year() string {
 }
 
 func courseOrg() string {
+	loadEnv()
 	return cmp.Or(os.Getenv("COURSE_ORG"), os.ExpandEnv("$COURSE-$YEAR"))
 }
 

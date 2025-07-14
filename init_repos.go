@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -59,6 +61,35 @@ func runCommand(dir string, args ...string) error {
 		return fmt.Errorf("command %q failed: %w", args, err)
 	}
 	return nil
+}
+
+func runContextCommand(ctx context.Context, dir string, args ...string) error {
+	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+	cmd.Dir = dir
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("command %q failed: %w", args, err)
+	}
+	return nil
+}
+
+func runCommandWithOutput[T any](args ...string) (*T, error) {
+	cmd := exec.Command(args[0], args[1:]...)
+	cmd.Stderr = os.Stderr
+
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, fmt.Errorf("command %q failed: %w", args, err)
+	}
+	// parse the output if needed
+	// for example, if the command returns JSON, you can unmarshal it into a struct
+	var result T
+	if err := json.Unmarshal(out, &result); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal output: %w", err)
+	}
+	return &result, nil
 }
 
 func gitURL(ghOrg, repo string) string {
