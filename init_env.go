@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"cmp"
 	"flag"
 	"fmt"
@@ -106,13 +107,49 @@ func exists(filename string) bool {
 // It will not override a variable that already exists in the environment.
 func loadEnv() error {
 	envFile := envFilePath()
-	if err := Load(envFile); err != nil {
+	if err := load(envFile); err != nil {
 		return err
 	}
 	if err := checkRequiredEnv(); err != nil {
 		return err
 	}
 	return nil
+}
+
+func load(filename string) error {
+	file, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close() // skipcq: GO-S2307
+
+	fmt.Printf("Loading environment variables from %s\n", filename)
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if ignore(line) {
+			continue
+		}
+		key, val, found := strings.Cut(line, "=")
+		if !found {
+			continue
+		}
+		k := strings.TrimSpace(key)
+		if os.Getenv(k) != "" {
+			// Ignore .env entries already set in the environment.
+			continue
+		}
+		val = os.ExpandEnv(strings.Trim(strings.TrimSpace(val), `"`))
+		os.Setenv(k, val)
+	}
+
+	return scanner.Err()
+}
+
+func ignore(line string) bool {
+	trimmedLine := strings.TrimSpace(line)
+	return trimmedLine == "" || strings.HasPrefix(trimmedLine, "#")
 }
 
 func checkRequiredEnv() error {
@@ -146,7 +183,6 @@ func year() string {
 }
 
 func courseOrg() string {
-	loadEnv()
 	return cmp.Or(os.Getenv("COURSE_ORG"), os.ExpandEnv("$COURSE-$YEAR"))
 }
 
