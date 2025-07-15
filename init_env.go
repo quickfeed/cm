@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"cmp"
 	"flag"
 	"fmt"
@@ -121,17 +120,13 @@ func loadEnv() error {
 }
 
 func load(filename string) error {
-	file, err := os.Open(filename)
+	b, err := os.ReadFile(filename)
 	if err != nil {
 		return err
 	}
-	defer file.Close() // skipcq: GO-S2307
-
 	fmt.Printf("Loading environment variables from %s\n", filename)
 
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Text()
+	for line := range strings.Lines(string(b)) {
 		if ignore(line) {
 			continue
 		}
@@ -147,10 +142,10 @@ func load(filename string) error {
 		val = os.ExpandEnv(strings.Trim(strings.TrimSpace(val), `"`))
 		os.Setenv(k, val)
 	}
-
-	return scanner.Err()
+	return nil
 }
 
+// ignore returns true if the line is empty or a comment.
 func ignore(line string) bool {
 	trimmedLine := strings.TrimSpace(line)
 	return trimmedLine == "" || strings.HasPrefix(trimmedLine, "#")
