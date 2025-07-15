@@ -32,7 +32,7 @@ bsync := "rsync --prune-empty-dirs -av --itemize-changes"
 
 # Install the cm command to simplify course management.
 @install-cm:
-    go install dat520/internal/cmd/cm
+    go install github.com/quickfeed/cm@latest
 
 # Install the required tools for the course repository.
 @tools:
@@ -60,14 +60,14 @@ bsync := "rsync --prune-empty-dirs -av --itemize-changes"
     (cd {{dest}}/info && go mod tidy && git status)
 
 # Sync changes to the assignments repository.
-@assignments +lab: install-cm && (msg "assignments")
+@assignments +lab: readme && (msg "assignments")
     echo "Syncing {{lab}} assignments to {{dest}}/assignments/"
     go mod tidy
     # Sync shared files from internal to assignments (using bsync to avoid deleting lab folders)
     {{bsync}} --filter='dir-merge /.rsync-filter-assignments' . {{dest}}/assignments
     # Sync lab-specific files (using rsync which will delete files no longer in the source folder)
     {{rsync}} --filter='dir-merge /.rsync-filter-assignments' {{lab}} {{dest}}/assignments
-    (cp go.mod {{dest}}/assignments && cd {{dest}}/assignments && go mod tidy)
+    (cp go.mod {{dest}}/assignments && cd {{dest}}/assignments && go mod edit -droptool=github.com/quickfeed/cm && go mod tidy)
     cm update-doc-tags -repo assignments
     cm remove-solution-tags -repo assignments
     (cd {{dest}}/assignments && go mod tidy && git status)
