@@ -84,12 +84,16 @@ func saveEnv(env map[string]string) error {
 	if err != nil {
 		return err
 	}
-	defer file.Close() // skipcq: GO-S2307
+	defer func() {
+		if closeErr := file.Close(); err == nil {
+			err = closeErr
+		}
+	}()
 
 	fmt.Printf("Saving environment variables to %s\n", lastDirFile(envFile))
 
 	for k, v := range env {
-		_, err := fmt.Fprintf(file, "%s=%s\n", k, v)
+		_, err = fmt.Fprintf(file, "%s=%s\n", k, v)
 		if err != nil {
 			return err
 		}
