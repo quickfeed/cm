@@ -22,9 +22,6 @@ func cloneAllRepos() {
 	if err := loadEnv(); err != nil {
 		exitErr(err, "Error loading environment variables")
 	}
-	// Alternative: use the GitHub CLI to list repositories:
-	// gh repo list dat520-2025 --limit 100 --json name,url
-	// gh repo list dat520-2025 --limit 100 --json name
 	ghRepos, err := getRepositories(courseOrg())
 	if err != nil {
 		exitErr(err, "Error listing repositories")
@@ -51,7 +48,7 @@ func cloneAllRepos() {
 		}
 
 		wg.Add(1)
-		go func(repo listReposJSON) {
+		go func(repo repositoryInfo) {
 			defer wg.Done()
 
 			// Acquire semaphore

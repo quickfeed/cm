@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-type listReposJSON struct {
+type repositoryInfo struct {
 	Name string `json:"name"`
 	URL  string `json:"url,omitempty"`
 }
@@ -34,10 +34,6 @@ func listRepos(args []string) {
 	if err != nil {
 		exitErr(err, "Error listing repositories")
 	}
-
-	// Alternative: use the GitHub CLI to list repositories:
-	// gh repo list dat520-2025 --limit 100 --json name,url
-	// gh repo list dat520-2025 --limit 100 --json name
 	for _, repo := range repos {
 		fmt.Printf("%s", repo.Name)
 		if url {
@@ -47,8 +43,12 @@ func listRepos(args []string) {
 	}
 }
 
-func getRepositories(org string) ([]listReposJSON, error) {
-	repos, err := runCommandWithOutput[[]listReposJSON]("gh", "repo", "list", org, "--limit", "100", "--json", "name,url")
+// getRepositories returns a list of repositories for the given organization.
+// It uses the GitHub CLI command to fetch the repositories with the following command:
+//
+//	gh repo list <org> --limit 100 --json name,url
+func getRepositories(org string) ([]repositoryInfo, error) {
+	repos, err := runCommandWithOutput[[]repositoryInfo]("gh", "repo", "list", org, "--limit", "100", "--json", "name,url")
 	if err != nil {
 		exitErr(err, "Error fetching repositories")
 	}
