@@ -5,6 +5,7 @@
         "droptool",
         "dylib",
         "fset",
+        "goccy",
         "godox",
         "gofmt",
         "golangci",
