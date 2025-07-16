@@ -4,10 +4,15 @@ import (
 	"cmp"
 	"flag"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 	"strings"
 )
+
+var hardcodedEnvMap = map[string]string{
+	"GOPRIVATE": "github.com/quickfeed/cm",
+}
 
 // initEnv initializes the environment variables for the course.
 // The environment variables are saved to a .env file in the root of the git repository.
@@ -47,6 +52,8 @@ func initEnv(args []string) {
 
 	// set environment variables to be saved to .env file
 	env := make(map[string]string)
+	// set the required environment variables
+	maps.Copy(env, hardcodedEnvMap)
 	fs.VisitAll(func(f *flag.Flag) {
 		envName := toEnvKey(f.Name)
 		envValue := toEnvValue(f.Value.String())

@@ -9,6 +9,7 @@
         "godox",
         "gofmt",
         "golangci",
+        "GOPRIVATE",
         "helpbot",
         "HTMLURL",
         "labplan",
