@@ -30,7 +30,7 @@ func initEnv(args []string) {
 		botUser        string
 	)
 	fs.IntVar(&year, "year", 0, "Course year (required)")
-	fs.StringVar(&courseName, "name", "", "Course name (required)")
+	fs.StringVar(&courseName, "course-name", "", "Course name (required)")
 	fs.StringVar(&course, "course", "", "Course code (default: git repo name)")
 	fs.StringVar(&discordJoinURL, "discord-join-url", "", "Discord join URL")
 	fs.StringVar(&botUser, "bot-user", "", "Help bot user (default: helpbot)")
@@ -181,7 +181,7 @@ func course() string {
 }
 
 func name() string {
-	return os.Getenv("NAME")
+	return os.Getenv("COURSE_NAME")
 }
 
 func year() string {

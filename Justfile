@@ -12,7 +12,7 @@ bsync := "rsync --prune-empty-dirs -av --itemize-changes"
 
 # Create .env file for the course. Do only once and commit the file to git and edit it as needed.
 @env:
-    go tool cm init-env --year 2025 --course dat515 --name "Cloud Computing" --discord-join-url "https://discord.gg/abc123" --bot-user "dat515-helpbot"
+    go tool cm init-env --year 2025 --course dat515 --course-name "Cloud Computing" --discord-join-url "https://discord.gg/abc123" --bot-user "dat515-helpbot"
 
 # Initialize the course repositories based on the .env file.
 @init:
