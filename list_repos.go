@@ -48,12 +48,12 @@ func listRepos(args []string) {
 //
 //	gh repo list <org> --limit 100 --json name,url
 func getRepositories(org string) ([]repositoryInfo, error) {
-	repos, err := runCommandWithOutput[[]repositoryInfo]("gh", "repo", "list", org, "--limit", "100", "--json", "name,url")
+	repos, err := runCommandWithOutput[[]repositoryInfo](gitRoot, "gh", "repo", "list", org, "--limit", "100", "--json", "name,url")
 	if err != nil {
 		exitErr(err, "Error fetching repositories")
 	}
-	if repos == nil || len(*repos) == 0 {
+	if repos == nil || len(repos) == 0 {
 		exitErr(fmt.Errorf("no repositories found"), "Error listing repositories")
 	}
-	return *repos, nil
+	return repos, nil
 }
