@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/exec"
 )
 
 var (
@@ -45,18 +44,6 @@ func initGitRepository(workingDir, ghOrg, repo string) error {
 		if err := runCommand(workingDir, cmd...); err != nil {
 			return err
 		}
-	}
-	return nil
-}
-
-func runCommand(dir string, args ...string) error {
-	cmd := exec.Command(args[0], args[1:]...)
-	cmd.Dir = dir
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("command %q failed: %w", args, err)
 	}
 	return nil
 }

@@ -7,8 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/quickfeed/quickfeed/internal/env"
 )
 
 // initEnv initializes the environment variables for the course.
@@ -85,12 +83,16 @@ func saveEnv(env map[string]string) error {
 	if err != nil {
 		return err
 	}
-	defer file.Close() // skipcq: GO-S2307
+	defer func() {
+		if closeErr := file.Close(); err == nil {
+			err = closeErr
+		}
+	}()
 
 	fmt.Printf("Saving environment variables to %s\n", lastDirFile(envFile))
 
 	for k, v := range env {
-		_, err := fmt.Fprintf(file, "%s=%s\n", k, v)
+		_, err = fmt.Fprintf(file, "%s=%s\n", k, v)
 		if err != nil {
 			return err
 		}
@@ -108,13 +110,45 @@ func exists(filename string) bool {
 // It will not override a variable that already exists in the environment.
 func loadEnv() error {
 	envFile := envFilePath()
-	if err := env.Load(envFile); err != nil {
+	if err := load(envFile); err != nil {
 		return err
 	}
 	if err := checkRequiredEnv(); err != nil {
 		return err
 	}
 	return nil
+}
+
+func load(filename string) error {
+	b, err := os.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Loading environment variables from %s\n", filename)
+
+	for line := range strings.Lines(string(b)) {
+		if ignore(line) {
+			continue
+		}
+		key, val, found := strings.Cut(line, "=")
+		if !found {
+			continue
+		}
+		k := strings.TrimSpace(key)
+		if os.Getenv(k) != "" {
+			// Ignore .env entries already set in the environment.
+			continue
+		}
+		val = os.ExpandEnv(strings.Trim(strings.TrimSpace(val), `"`))
+		os.Setenv(k, val)
+	}
+	return nil
+}
+
+// ignore returns true if the line is empty or a comment.
+func ignore(line string) bool {
+	trimmedLine := strings.TrimSpace(line)
+	return trimmedLine == "" || strings.HasPrefix(trimmedLine, "#")
 }
 
 func checkRequiredEnv() error {

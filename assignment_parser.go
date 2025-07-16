@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"gopkg.in/yaml.v3"
+	"github.com/goccy/go-yaml"
 )
 
 const (
@@ -50,7 +50,7 @@ func parseAssignment(filename string) (*AssignmentInfo, error) {
 	}
 
 	res := &AssignmentInfo{}
-	err = yaml.UnmarshalStrict(marshalledYml, res)
+	err = yaml.Unmarshal(marshalledYml, res)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal yaml: %w", err)
 	}
