@@ -11,33 +11,28 @@ bsync := "rsync --prune-empty-dirs -av --itemize-changes"
     just --list
 
 # Create .env file for the course. Do only once and commit the file to git and edit it as needed.
-@env: install-cm
-    cm init-env --year 2025 --course dat520 --name "Distributed Systems" --discord-join-url "https://discord.gg/abc123" --bot-user "dat520-helpbot"
+@env:
+    go tool cm init-env --year 2025 --course dat515 --name "Cloud Computing" --discord-join-url "https://discord.gg/abc123" --bot-user "dat515-helpbot"
 
 # Initialize the course repositories based on the .env file.
-@init: install-cm
-    cm init-repos
+@init:
+    go tool cm init-repos
 
 # Update the README.md files for all labs based on readme_tmpl.md files.
-@readme: install-cm
-    cm gen-readme
+@readme:
+    go tool cm gen-readme
 
 # Clone the username-labs repository to the $dest directory, where username is
 # the GitHub username of the user running the command.
 # This is a one-time operation to clone the repository to the correct location.
 # This requires that the username-labs repository exists on GitHub; it should be
 # created by the user on QuickFeed first and left empty.
-@clone: install-cm
-    cm clone-repo -pull
-
-# Install the cm command to simplify course management.
-@install-cm:
-    go install github.com/quickfeed/cm@latest
+@clone:
+    go tool cm clone-repo -pull
 
 # Install the required tools for the course repository.
 @tools:
     brew install protobuf gh just tree golangci-lint
-    go install tool
 
 [private]
 @msg target:
@@ -52,11 +47,11 @@ bsync := "rsync --prune-empty-dirs -av --itemize-changes"
     echo "  git push -u origin main"
 
 # Sync changes to the info repository.
-@info: install-cm && (msg "info")
+@info: && (msg "info")
     echo "Syncing info repo to {{dest}}/info"
     go mod tidy
     {{rsync}} --filter='dir-merge /.rsync-filter-info' info/ {{dest}}/info
-    cm update-doc-tags -repo info
+    go tool cm update-doc-tags -repo info
     (cd {{dest}}/info && go mod tidy && git status)
 
 # Sync changes to the assignments repository.
@@ -68,16 +63,16 @@ bsync := "rsync --prune-empty-dirs -av --itemize-changes"
     # Sync lab-specific files (using rsync which will delete files no longer in the source folder)
     {{rsync}} --filter='dir-merge /.rsync-filter-assignments' {{lab}} {{dest}}/assignments
     (cp go.mod {{dest}}/assignments && cd {{dest}}/assignments && go mod edit -droptool=github.com/quickfeed/cm && go mod tidy)
-    cm update-doc-tags -repo assignments
-    cm remove-solution-tags -repo assignments
+    go tool cm update-doc-tags -repo assignments
+    go tool cm remove-solution-tags -repo assignments
     (cd {{dest}}/assignments && go mod tidy && git status)
 
 # Sync changes to the tests repository.
-@tests +lab: install-cm && (msg "tests")
+@tests +lab: && (msg "tests")
     echo "Syncing {{lab}} tests to {{dest}}/tests/"
     go mod tidy
-    cm add-main-tests
-    cm add-lint-checkers -labs "{{lab}}"
+    go tool cm add-main-tests
+    go tool cm add-lint-checkers -labs "{{lab}}"
     # Sync shared files from internal to tests (using bsync to avoid deleting lab folders)
     {{bsync}} --filter='dir-merge /.rsync-filter-tests' . {{dest}}/tests
     # Sync lab-specific files (using rsync which will delete files no longer in the source folder)
