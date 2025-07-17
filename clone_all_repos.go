@@ -55,13 +55,17 @@ func cloneAllRepos() {
 			semaphore <- struct{}{}
 			defer func() { <-semaphore }() // Release semaphore
 
-			msg := fmt.Sprintf("Cloned %q into %q", repo, path)
-			if exists(repoPath(repo.Name)) {
-				msg = fmt.Sprintf("Repository %q updated", repo)
-			}
-
 			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
+			if exists(repoPath(repo.Name)) {
+				// If the repository already exists, we will update it instead of cloning
+				if err := runContextCommand(ctx, repoPath(repo.Name), "git", "pull"); err != nil {
+					fmt.Printf("Error updating %q: %v\n", repo, err)
+					return
+				}
+				fmt.Printf("Updated %q in %q\n", repo.Name, repoPath(repo.Name))
+				return
+			}
 
 			// clone the repository
 			err := runContextCommand(ctx, ".", "git", "clone", repo.URL, repoPath(repo.Name))
@@ -69,7 +73,7 @@ func cloneAllRepos() {
 				fmt.Printf("Error cloning %q: %v\n", repo, err)
 				return
 			}
-			fmt.Println(msg)
+			fmt.Printf("Cloned %q into %q\n", repo.Name, repoPath(repo.Name))
 		}(repo)
 	}
 
