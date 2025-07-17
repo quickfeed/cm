@@ -14,6 +14,7 @@ const (
 	updateDocTagsCmd      = "update-doc-tags"
 	removeSolutionTagsCmd = "remove-solution-tags"
 	genReadmeCmd          = "gen-readme"
+	genTestsJSONCmd       = "gen-tests-json"
 	renameLegacyTestsCmd  = "rename-tests"
 	addLintCheckersCmd    = "add-lint-checkers"
 	addMainTestsCmd       = "add-main-tests"
@@ -42,6 +43,8 @@ func main() {
 		removeSolutionTags(args)
 	case genReadmeCmd:
 		genReadme()
+	case genTestsJSONCmd:
+		genTestsJSON(args)
 	case renameLegacyTestsCmd:
 		renameLegacyTests()
 	case addLintCheckersCmd:

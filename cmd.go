@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 func runCommand(dir string, args ...string) error {
@@ -32,8 +34,10 @@ func runContextCommand(ctx context.Context, dir string, args ...string) error {
 	return nil
 }
 
-// runCommandWithOutput runs a command and parses the output into a specified type.
+// runCommandWithOutput runs a command and unmarshal the output into a specified type.
 // It is useful for commands that return JSON output.
+// If command execution fails, we still attempt to parse the output as JSON,
+// and return the parsed result along with the error.
 //
 // Example usage:
 //
@@ -42,7 +46,7 @@ func runContextCommand(ctx context.Context, dir string, args ...string) error {
 //	    Field2 int    `json:"field2"`
 //	}
 //
-//	output, err := runCommandWithOutput[MyOutput]("mycommand", "arg1", "arg2"); err != nil {
+//	output, err := runCommandWithOutput[MyOutput](workDir, "mycommand", "arg1", "arg2"); err != nil {
 //	    fmt.Println("Error:", err)
 //	}
 //
@@ -54,19 +58,34 @@ func runContextCommand(ctx context.Context, dir string, args ...string) error {
 // Example return value:
 //
 //	&MyOutput{Field1: "value1", Field2: 42}
-func runCommandWithOutput[T any](args ...string) (*T, error) {
+func runCommandWithOutput[T any](dir string, args ...string) (result T, err error) {
 	cmd := exec.Command(args[0], args[1:]...)
+	cmd.Dir = dir
 	cmd.Stderr = os.Stderr
 
 	out, err := cmd.Output()
-	if err != nil {
-		return nil, fmt.Errorf("command %q failed: %w", args, err)
+	// check if the output is valid JSON, even if the command fails.
+	if !json.Valid(out) {
+		// if the output is not valid JSON, check if individual lines are
+		// valid JSON; if so, create a JSON array from the combined lines.
+		// this is useful for commands that output multiple JSON objects, one per line.
+		jsonLines := []string{"["}
+		for line := range bytes.Lines(out) {
+			if len(line) == 0 || !json.Valid(line) {
+				continue // skip empty lines or lines that are not valid JSON
+			}
+			jsonLines = append(jsonLines, string(line)+",")
+		}
+		lastLine := len(jsonLines) - 1
+		jsonLines[lastLine] = strings.TrimSuffix(jsonLines[lastLine], ",") // remove trailing comma from last line
+		jsonLines = append(jsonLines, "]")
+		out = []byte(strings.Join(jsonLines, "\n"))
 	}
-	// parse the output if needed
-	// for example, if the command returns JSON, you can unmarshal it into a struct
-	var result T
+
+	// unmarshal the output into the specified type
 	if err := json.Unmarshal(out, &result); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal output: %w", err)
+		return result, fmt.Errorf("failed to unmarshal output: %w", err)
 	}
-	return &result, nil
+	// return both the result and the command error, if any
+	return result, err
 }
