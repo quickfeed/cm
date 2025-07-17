@@ -14,6 +14,7 @@ import (
 const (
 	testsJSONFile = "tests.json"
 	errMsg        = "No tests.json file generated"
+	goTestCommand = "go test -v -tags solution ./..."
 )
 
 type score struct {
@@ -40,6 +41,7 @@ func deduplicateScores(scores []score) []score {
 func genTestsJSON(args []string) {
 	fs := flag.NewFlagSet(genTestsJSONCmd, flag.ExitOnError)
 	labs := fs.String("labs", "", "Lab folders to generate tests.json for (space separated)")
+	view := fs.Bool("view", false, "Show the JSON output of the generated tests.json file")
 
 	if err := fs.Parse(args); err != nil {
 		exitErr(err, "Error parsing flags")
@@ -49,15 +51,20 @@ func genTestsJSON(args []string) {
 		if !exists(courseRepoPath(dir)) {
 			exitErr(fmt.Errorf("directory %q does not exist", dir), errMsg)
 		}
-		// Annoyingly, we need to run this with both -v and ./... to ensure that we get the JSON output.
+		// Annoyingly, we need to run this with both -v and ./... to get the JSON output.
 		// The ./... because some labs contain several subdirectories with tests.
-		// When running with ./... and without the -v flag, it will suppress the output and we won't get the JSON.
-		scoreList, err := runCommandWithOutput[[]score](courseRepoPath(dir), "go", "test", "-v", "-tags", "solution", "./...")
-		if err != nil {
-			exitErr(err, "Error running go test")
-		}
+		// Running without the -v flag, it will suppress the output and we won't get the JSON.
+		scoreList, err := runCommandWithOutput[[]score](courseRepoPath(dir), strings.Split(goTestCommand, " ")...)
 		if scoreList == nil {
-			exitErr(fmt.Errorf("no score objects found in %q", dir), errMsg)
+			exitErr(fmt.Errorf("no score objects found for %q", dir), errMsg)
+		}
+		if err != nil {
+			fmt.Printf("Error running %q for %s: %v\n", goTestCommand, dir, err)
+			fmt.Printf("You may want to run %q manually to debug the issue.\n", goTestCommand)
+			// Try to process the scores anyway; this will allow us to generate a tests.json
+			// file even if the command fails. This is usually fine since the empty score
+			// objects that we need are usually printed at the start of the test output.
+			// The exception could be if there was a compile error or panic situation.
 		}
 
 		scoreList = deduplicateScores(scoreList)
@@ -73,6 +80,11 @@ func genTestsJSON(args []string) {
 		if err := json.NewEncoder(f).Encode(scoreList); err != nil {
 			exitErr(err, errMsg)
 		}
-		fmt.Printf("Generated %s in %s\n", testsJSONFile, courseRepoPath(dir))
+		fmt.Printf("Generated %s for %s\n", testsJSONFile, courseRepoPath(dir))
+		if *view {
+			for _, s := range scoreList {
+				fmt.Printf("{%q:%q,%q:%d,%q:%d}\n", "TestName", s.TestName, "Max Score", s.MaxScore, "Weight", s.Weight)
+			}
+		}
 	}
 }
