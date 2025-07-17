@@ -36,6 +36,8 @@ func runContextCommand(ctx context.Context, dir string, args ...string) error {
 
 // runCommandWithOutput runs a command and unmarshal the output into a specified type.
 // It is useful for commands that return JSON output.
+// If command execution fails, we still attempt to parse the output as JSON,
+// and return the parsed result along with the error.
 //
 // Example usage:
 //
@@ -62,9 +64,7 @@ func runCommandWithOutput[T any](dir string, args ...string) (result T, err erro
 	cmd.Stderr = os.Stderr
 
 	out, err := cmd.Output()
-	if err != nil {
-		return result, fmt.Errorf("command %q failed: %w", args, err)
-	}
+	// check if the output is valid JSON, even if the command fails.
 	if !json.Valid(out) {
 		// if the output is not valid JSON, check if individual lines are
 		// valid JSON; if so, create a JSON array from the combined lines.
@@ -86,5 +86,6 @@ func runCommandWithOutput[T any](dir string, args ...string) (result T, err erro
 	if err := json.Unmarshal(out, &result); err != nil {
 		return result, fmt.Errorf("failed to unmarshal output: %w", err)
 	}
-	return result, nil
+	// return both the result and the command error, if any
+	return result, err
 }
