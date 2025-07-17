@@ -23,7 +23,7 @@ func Test0Formatting(t *testing.T) {
 	sc := scores.Max()
 	defer sc.Print(t)
 
-	run(t, sc, "golangci-lint run --tests=false --disable-all --enable gofmt",
+	run(t, sc, "golangci-lint fmt --diff-colored --enable gofmt",
 		"Formatting checker failed: please configure your editor to format code on save")
 }
 
@@ -31,7 +31,7 @@ func Test0TODOItems(t *testing.T) {
 	sc := scores.Max()
 	defer sc.Print(t)
 
-	run(t, sc, "golangci-lint run --tests=false --disable-all --enable godox",
+	run(t, sc, "golangci-lint run --enable-only godox",
 		"TODO checker failed: TODO comments must be removed when a task has been completed")
 }
 
@@ -39,8 +39,7 @@ func Test0Lint(t *testing.T) {
 	sc := scores.Max()
 	defer sc.Print(t)
 
-	// lint for several Go style issues: possibly too aggressive
-	run(t, sc, "golangci-lint run --tests=false --disable unused", "Lint checker failed")
+	run(t, sc, "golangci-lint run", "Lint checker failed")
 }
 
 func Test0VetCheck(t *testing.T) {
