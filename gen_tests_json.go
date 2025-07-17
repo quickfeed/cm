@@ -14,8 +14,14 @@ import (
 const (
 	testsJSONFile = "tests.json"
 	errMsg        = "No tests.json file generated"
-	goTestCommand = "go test -v -tags solution ./..."
 )
+
+// testCommands holds the test commands for supported languages.
+// The language key should be lowercase.
+var testCommands = map[string]string{
+	"go": "go test -v -tags solution ./...",
+	"c#": "dotnet -v",
+}
 
 type score struct {
 	TestName string
@@ -42,9 +48,17 @@ func genTestsJSON(args []string) {
 	fs := flag.NewFlagSet(genTestsJSONCmd, flag.ExitOnError)
 	labs := fs.String("labs", "", "Lab folders to generate tests.json for (space separated)")
 	view := fs.Bool("view", false, "Show the JSON output of the generated tests.json file")
+	runnerLang := fs.String("runner", "go", "Test runner's programming language (default: go)")
 
 	if err := fs.Parse(args); err != nil {
 		exitErr(err, "Error parsing flags")
+	}
+
+	lang := strings.ToLower(*runnerLang)
+	testRunnerCmd, ok := testCommands[lang]
+	if !ok {
+		languages := slices.Collect(maps.Keys(testCommands))
+		exitErr(fmt.Errorf("unsupported language %q, supported languages are: %v", lang, languages), errMsg)
 	}
 
 	for dir := range strings.SplitSeq(*labs, " ") {
@@ -54,13 +68,13 @@ func genTestsJSON(args []string) {
 		// Annoyingly, we need to run this with both -v and ./... to get the JSON output.
 		// The ./... because some labs contain several subdirectories with tests.
 		// Running without the -v flag, it will suppress the output and we won't get the JSON.
-		scoreList, err := runCommandWithOutput[[]score](courseRepoPath(dir), strings.Split(goTestCommand, " ")...)
+		scoreList, err := runCommandWithOutput[[]score](courseRepoPath(dir), strings.Split(testRunnerCmd, " ")...)
 		if scoreList == nil {
 			exitErr(fmt.Errorf("no score objects found for %q", dir), errMsg)
 		}
 		if err != nil {
-			fmt.Printf("Error running %q for %s: %v\n", goTestCommand, dir, err)
-			fmt.Printf("You may want to run %q manually to debug the issue.\n", goTestCommand)
+			fmt.Printf("Error running %q for %s: %v\n", testRunnerCmd, dir, err)
+			fmt.Printf("You may want to run %q manually to debug the issue.\n", testRunnerCmd)
 			// Try to process the scores anyway; this will allow us to generate a tests.json
 			// file even if the command fails. This is usually fine since the empty score
 			// objects that we need are usually printed at the start of the test output.
