@@ -83,7 +83,11 @@ func genTestsJSON(args []string) {
 		fmt.Printf("Generated %s for %s\n", testsJSONFile, courseRepoPath(dir))
 		if *view {
 			for _, s := range scoreList {
-				fmt.Printf("{%q:%q,%q:%d,%q:%d}\n", "TestName", s.TestName, "Max Score", s.MaxScore, "Weight", s.Weight)
+				jsonData, err := json.Marshal(s)
+				if err != nil {
+					continue
+				}
+				fmt.Println(string(jsonData))
 			}
 		}
 	}
