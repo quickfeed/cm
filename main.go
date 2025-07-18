@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"sort"
 )
 
 const (
@@ -18,51 +19,172 @@ const (
 	renameLegacyTestsCmd  = "rename-tests"
 	addLintCheckersCmd    = "add-lint-checkers"
 	addMainTestsCmd       = "add-main-tests"
+	helpCmd               = "help"
 )
+
+// Command represents a single command with its description and function
+type Command struct {
+	Name        string
+	Description string
+	Usage       string
+	Function    func([]string)
+}
+
+// getCommands returns all available commands
+func getCommands() map[string]Command {
+	return map[string]Command{
+		initEnvCmd: {
+			Name:        initEnvCmd,
+			Description: "Initialize environment variables for the course",
+			Usage:       "cm init-env -year <year> -name <course-name> [-course <course-code>] [-discord-join-url <url>] [-bot-user <username>]",
+			Function:    initEnv,
+		},
+		initReposCmd: {
+			Name:        initReposCmd,
+			Description: "Initialize course repositories (assignments, info, tests)",
+			Usage:       "cm init-repos",
+			Function:    func([]string) { initRepos() },
+		},
+		listReposCmd: {
+			Name:        listReposCmd,
+			Description: "List all student and group repositories",
+			Usage:       "cm list-repos [-url]",
+			Function:    listRepos,
+		},
+		cloneRepoCmd: {
+			Name:        cloneRepoCmd,
+			Description: "Clone a specified repository or current user's repository",
+			Usage:       "cm clone-repo [-repo <repo-name>] [-pull]",
+			Function:    cloneRepo,
+		},
+		cloneAllReposCmd: {
+			Name:        cloneAllReposCmd,
+			Description: "Clone all student and group repositories",
+			Usage:       "cm clone-all-repos",
+			Function:    func([]string) { cloneAllRepos() },
+		},
+		updateDocTagsCmd: {
+			Name:        updateDocTagsCmd,
+			Description: "Update documentation tags in markdown files",
+			Usage:       "cm update-doc-tags -repo <assignments|tests|info>",
+			Function:    updateDocTags,
+		},
+		removeSolutionTagsCmd: {
+			Name:        removeSolutionTagsCmd,
+			Description: "Remove solution build tags from Go files",
+			Usage:       "cm remove-solution-tags -repo <assignments|tests>",
+			Function:    removeSolutionTags,
+		},
+		genReadmeCmd: {
+			Name:        genReadmeCmd,
+			Description: "Generate README.md files from readme_tmpl.md templates",
+			Usage:       "cm gen-readme",
+			Function:    func([]string) { genReadme() },
+		},
+		genTestsJSONCmd: {
+			Name:        genTestsJSONCmd,
+			Description: "Generate tests.json files for lab assignments",
+			Usage:       "cm gen-tests-json -labs <lab1> <lab2> ...",
+			Function:    genTestsJSON,
+		},
+		renameLegacyTestsCmd: {
+			Name:        renameLegacyTestsCmd,
+			Description: "Rename legacy *_ag_test.go files to *_qf_test.go",
+			Usage:       "cm rename-tests",
+			Function:    func([]string) { renameLegacyTests() },
+		},
+		addLintCheckersCmd: {
+			Name:        addLintCheckersCmd,
+			Description: "Add linter test files to specified lab folders",
+			Usage:       "cm add-lint-checkers -labs <lab1> <lab2> ...",
+			Function:    addLintCheckers,
+		},
+		addMainTestsCmd: {
+			Name:        addMainTestsCmd,
+			Description: "Add main test files to directories with existing test files",
+			Usage:       "cm add-main-tests",
+			Function:    func([]string) { addMainTests() },
+		},
+		helpCmd: {
+			Name:        helpCmd,
+			Description: "Show help for commands",
+			Usage:       "cm help [command]",
+			Function:    showHelp,
+		},
+	}
+}
 
 func main() {
 	if len(os.Args) < 2 {
 		usageMsg()
+		return
 	}
 
 	cmd, args := os.Args[1], os.Args[2:]
-	switch cmd {
-	case initEnvCmd:
-		initEnv(args)
-	case initReposCmd:
-		initRepos()
-	case listReposCmd:
-		listRepos(args)
-	case cloneRepoCmd:
-		cloneRepo(args)
-	case cloneAllReposCmd:
-		cloneAllRepos()
-	case updateDocTagsCmd:
-		updateDocTags(args)
-	case removeSolutionTagsCmd:
-		removeSolutionTags(args)
-	case genReadmeCmd:
-		genReadme()
-	case genTestsJSONCmd:
-		genTestsJSON(args)
-	case renameLegacyTestsCmd:
-		renameLegacyTests()
-	case addLintCheckersCmd:
-		addLintCheckers(args)
-	case addMainTestsCmd:
-		addMainTests()
-	// case "sync":
-	// case "help":
-	default:
-		fmt.Printf("Unknown command: %s\n", cmd)
-		usageMsg()
+	commands := getCommands()
+	
+	// Look up command in registry
+	if command, exists := commands[cmd]; exists {
+		command.Function(args)
+		return
 	}
+	
+	// Handle unknown commands
+	fmt.Printf("Unknown command: %s\n", cmd)
+	usageMsg()
 }
 
 func usageMsg() {
 	fmt.Println("Usage: cm <command> [options]")
-	// TODO(meling): print available commands
+	fmt.Println()
+	fmt.Println("Available commands:")
+	
+	commands := getCommands()
+	
+	// Get sorted command names for consistent output
+	var commandNames []string
+	for cmd := range commands {
+		commandNames = append(commandNames, cmd)
+	}
+	sort.Strings(commandNames)
+	
+	// Find the longest command name for formatting
+	maxLen := 0
+	for _, cmd := range commandNames {
+		if len(cmd) > maxLen {
+			maxLen = len(cmd)
+		}
+	}
+	
+	// Print commands with descriptions
+	for _, cmd := range commandNames {
+		command := commands[cmd]
+		fmt.Printf("  %-*s  %s\n", maxLen, command.Name, command.Description)
+	}
+	
+	fmt.Println()
+	fmt.Println("Use 'cm help <command>' for detailed help on a specific command.")
 	os.Exit(1)
+}
+
+func showHelp(args []string) {
+	if len(args) == 0 {
+		usageMsg()
+		return
+	}
+	
+	cmd := args[0]
+	commands := getCommands()
+	command, exists := commands[cmd]
+	if !exists {
+		fmt.Printf("Unknown command: %s\n", cmd)
+		usageMsg()
+		return
+	}
+	
+	fmt.Printf("Command: %s\n", command.Name)
+	fmt.Printf("Description: %s\n", command.Description)
+	fmt.Printf("Usage: %s\n", command.Usage)
 }
 
 func exitErr(err error, msg string) {
