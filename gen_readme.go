@@ -24,7 +24,7 @@ type LabHeader struct {
 	ToC       []string
 }
 
-func genReadme() {
+func genReadme(_ []string) {
 	if err := loadEnv(); err != nil {
 		exitErr(err, "Error loading environment variables")
 	}

@@ -14,7 +14,7 @@ var (
 // ready to be populated with data from the main course repository.
 // Once the repositories are initialized, they are ready to be pushed
 // to the per-year course organization on GitHub.
-func initRepos() {
+func initRepos(_ []string) {
 	if err := loadEnv(); err != nil {
 		exitErr(err, "Error loading environment variables")
 	}

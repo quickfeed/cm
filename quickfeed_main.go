@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func addMainTests() {
+func addMainTests(_ []string) {
 	if err := walkDir(gitRoot); err != nil {
 		exitErr(err, "Error walking directory")
 	}
