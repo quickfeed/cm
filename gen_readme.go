@@ -104,13 +104,12 @@ func findLabsWithReadmeTmpl(repo string) (map[string][]string, error) {
 		if d.IsDir() {
 			return nil
 		}
-		
 		var emptySlice []string
 		if d.Name() == assignmentFile {
 			dir := filepath.Dir(path)
 			labs[dir] = emptySlice
 		} else if d.Name() == "assignment.yml" || d.Name() == "assignment.yaml" {
-			fmt.Printf("Warning: Found legacy assignment file '%s'. Please convert it to assignment.json format.\n", path)
+			fmt.Printf("Warning: Found legacy '%s' file. Run 'cm convert-yaml-to-json' to convert.\n", path)
 		}
 		return nil
 	})
