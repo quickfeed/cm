@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -60,8 +61,11 @@ func convertSingleFile(yamlFilePath string) error {
 		return fmt.Errorf("empty YAML file")
 	}
 
+	// Convert YAML format to JSON format by adding quotes around keys
+	jsonContent := convertYamlKeysToJson(contentStr)
+	
 	// Wrap content with { } to make it JSON-like
-	jsonContent := "{" + contentStr + "}"
+	jsonContent = "{" + jsonContent + "}"
 
 	// Validate that the result is valid JSON and marshal it back to ensure formatting
 	var jsonObj any
@@ -83,4 +87,33 @@ func convertSingleFile(yamlFilePath string) error {
 		return fmt.Errorf("failed to delete original YAML file: %w", err)
 	}
 	return nil
+}
+
+// convertYamlKeysToJson converts YAML key-value pairs to JSON format by adding quotes around keys
+func convertYamlKeysToJson(yamlContent string) string {
+	lines := strings.Split(yamlContent, "\n")
+	var jsonLines []string
+	
+	// Regex to match YAML key-value pairs (key: value)
+	keyValueRegex := regexp.MustCompile(`^(\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*(.*)$`)
+	
+	for _, line := range lines {
+		if keyValueRegex.MatchString(line) {
+			// Replace key: value with "key": value
+			matches := keyValueRegex.FindStringSubmatch(line)
+			if len(matches) == 4 {
+				indentation := matches[1]
+				key := matches[2]
+				value := matches[3]
+				jsonLines = append(jsonLines, fmt.Sprintf(`%s"%s": %s`, indentation, key, value))
+			} else {
+				jsonLines = append(jsonLines, line)
+			}
+		} else {
+			jsonLines = append(jsonLines, line)
+		}
+	}
+	
+	// Join with commas for JSON format
+	return strings.Join(jsonLines, ",\n")
 }
