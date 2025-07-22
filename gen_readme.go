@@ -96,28 +96,20 @@ func generateReadme(repo string, labs map[string][]string) map[int]*AssignmentIn
 func findLabsWithReadmeTmpl(repo string) (map[string][]string, error) {
 	labs := make(map[string][]string)
 
-	// find all labs with assignment.json files
+	// find all labs with assignment.json files and check for legacy files
 	err := filepath.WalkDir(repo, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
+		if d.IsDir() {
+			return nil
+		}
+		
 		var emptySlice []string
-		if !d.IsDir() && d.Name() == assignmentFile {
+		if d.Name() == assignmentFile {
 			dir := filepath.Dir(path)
 			labs[dir] = emptySlice
-		}
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	// check for legacy assignment.yml or assignment.yaml files and warn users
-	err = filepath.WalkDir(repo, func(path string, d os.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if !d.IsDir() && (d.Name() == "assignment.yml" || d.Name() == "assignment.yaml") {
+		} else if d.Name() == "assignment.yml" || d.Name() == "assignment.yaml" {
 			fmt.Printf("Warning: Found legacy assignment file '%s'. Please convert it to assignment.json format.\n", path)
 		}
 		return nil
