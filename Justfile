@@ -73,6 +73,7 @@ bsync := "rsync --prune-empty-dirs -av --itemize-changes"
     go mod tidy
     go tool cm add-main-tests
     go tool cm add-lint-checkers -labs "{{lab}}"
+    go tool cm gen-tests-json -view -labs "{{lab}}"
     # Sync shared files from internal to tests (using bsync to avoid deleting lab folders)
     {{bsync}} --filter='dir-merge /.rsync-filter-tests' . {{dest}}/tests
     # Sync lab-specific files (using rsync which will delete files no longer in the source folder)

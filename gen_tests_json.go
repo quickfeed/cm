@@ -65,6 +65,11 @@ func genTestsJSON(args []string) {
 		if !exists(courseRepoPath(dir)) {
 			exitErr(fmt.Errorf("directory %q does not exist", dir), errMsg)
 		}
+		// We can should run the test command with the SCORE_INIT environment variable set to 1,
+		// which will avoid running the tests and only initialize the score objects.
+		if err := os.Setenv("SCORE_INIT", "1"); err != nil {
+			exitErr(err, errMsg)
+		}
 		// Annoyingly, we need to run this with both -v and ./... to get the JSON output.
 		// The ./... because some labs contain several subdirectories with tests.
 		// Running without the -v flag, it will suppress the output and we won't get the JSON.

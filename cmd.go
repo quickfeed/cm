@@ -61,6 +61,7 @@ func runContextCommand(ctx context.Context, dir string, args ...string) error {
 func runCommandWithOutput[T any](dir string, args ...string) (result T, err error) {
 	cmd := exec.Command(args[0], args[1:]...)
 	cmd.Dir = dir
+	cmd.Env = os.Environ() // inherit environment variables
 	cmd.Stderr = os.Stderr
 
 	out, err := cmd.Output()
