@@ -27,13 +27,13 @@
 // Managing student repositories:
 //
 //	cm list-repos
-//	cm clone-repo -repo student-username-labs
+//	cm clone-repo -repo username-labs
 //	cm clone-all-repos
 //
 // Generating course materials:
 //
 //	cm gen-readme
-//	cm gen-tests-json -labs lab1 lab2 lab3
+//	cm gen-tests-json -labs lab1
 //	cm update-doc-tags -repo assignments
 //
 // # Commands
@@ -60,13 +60,13 @@
 //	<course-repo>/           # Main course repository
 //	├── .env                 # Environment variables
 //	├── assignments/         # Assignment templates
-//	├── info/               # Course information
-//	├── tests/              # Test files
-//	└── <year>/             # Year-specific repositories
-//	    ├── assignments/    # Published assignments
-//	    ├── info/          # Published course info
-//	    ├── tests/         # Published tests
-//	    └── student-repos/ # Cloned student repositories
+//	├── info/                # Course information
+//	├── tests/               # Test files
+//	└── <year>/              # Year-specific repositories
+//	    ├── assignments/     # Published assignments
+//	    ├── info/            # Published course info
+//	    ├── tests/           # Published tests
+//	    └── student-repos/   # Cloned student repositories
 //
 // For more information, see the QuickFeed documentation.
 package main
