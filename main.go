@@ -25,7 +25,6 @@ const (
 
 // Command represents a single command with its description and function
 type Command struct {
-	Name        string
 	Description string
 	Usage       string
 	Function    func([]string)
@@ -35,79 +34,66 @@ type Command struct {
 func getCommands() map[string]Command {
 	return map[string]Command{
 		initEnvCmd: {
-			Name:        initEnvCmd,
 			Description: "Initialize environment variables for the course",
 			Usage:       "cm init-env -year <year> -name <course-name> [-course <course-code>] [-discord-join-url <url>] [-bot-user <username>]",
 			Function:    initEnv,
 		},
 		initReposCmd: {
-			Name:        initReposCmd,
 			Description: "Initialize course repositories (assignments, info, tests)",
 			Usage:       "cm init-repos",
 			Function:    func([]string) { initRepos() },
 		},
 		listReposCmd: {
-			Name:        listReposCmd,
 			Description: "List all student and group repositories",
 			Usage:       "cm list-repos [-url]",
 			Function:    listRepos,
 		},
 		cloneRepoCmd: {
-			Name:        cloneRepoCmd,
 			Description: "Clone a specified repository or current user's repository",
 			Usage:       "cm clone-repo [-repo <repo-name>] [-pull]",
 			Function:    cloneRepo,
 		},
 		cloneAllReposCmd: {
-			Name:        cloneAllReposCmd,
 			Description: "Clone all student and group repositories",
 			Usage:       "cm clone-all-repos",
 			Function:    func([]string) { cloneAllRepos() },
 		},
 		updateDocTagsCmd: {
-			Name:        updateDocTagsCmd,
 			Description: "Update documentation tags in markdown files",
 			Usage:       "cm update-doc-tags -repo <assignments|tests|info>",
 			Function:    updateDocTags,
 		},
 		removeSolutionTagsCmd: {
-			Name:        removeSolutionTagsCmd,
 			Description: "Remove solution build tags from Go files",
 			Usage:       "cm remove-solution-tags -repo <assignments|tests>",
 			Function:    removeSolutionTags,
 		},
 		genReadmeCmd: {
-			Name:        genReadmeCmd,
 			Description: "Generate README.md files from readme_tmpl.md templates",
 			Usage:       "cm gen-readme",
 			Function:    func([]string) { genReadme() },
 		},
 		genTestsJSONCmd: {
-			Name:        genTestsJSONCmd,
 			Description: "Generate tests.json files for lab assignments",
 			Usage:       "cm gen-tests-json [-view] -labs <lab1>",
 			Function:    genTestsJSON,
 		},
 		renameLegacyTestsCmd: {
-			Name:        renameLegacyTestsCmd,
 			Description: "Rename legacy *_ag_test.go files to *_qf_test.go",
 			Usage:       "cm rename-tests",
 			Function:    func([]string) { renameLegacyTests() },
 		},
 		addLintCheckersCmd: {
-			Name:        addLintCheckersCmd,
 			Description: "Add linter test files to specified lab folder",
 			Usage:       "cm add-lint-checkers -labs <lab1>",
 			Function:    addLintCheckers,
 		},
 		addMainTestsCmd: {
-			Name:        addMainTestsCmd,
 			Description: "Add main test files to directories with existing test files",
 			Usage:       "cm add-main-tests",
 			Function:    func([]string) { addMainTests() },
 		},
 		helpCmd: {
-			Name:        helpCmd,
 			Description: "Show help for commands",
 			Usage:       "cm help [command]",
 			Function:    showHelp,
@@ -146,7 +132,7 @@ func usageMsg() {
 	// print commands with descriptions in sorted order
 	for _, cmd := range commandNames {
 		command := commands[cmd]
-		fmt.Printf("  %-*s  %s\n", maxLen, command.Name, command.Description)
+		fmt.Printf("  %-*s  %s\n", maxLen, cmd, command.Description)
 	}
 
 	fmt.Println()
