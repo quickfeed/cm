@@ -20,6 +20,7 @@ const (
 	renameLegacyTestsCmd  = "rename-tests"
 	addLintCheckersCmd    = "add-lint-checkers"
 	addMainTestsCmd       = "add-main-tests"
+	convertYamlToJSONCmd  = "convert-yaml-to-json"
 	helpCmd               = "help"
 )
 
@@ -92,6 +93,11 @@ func getCommands() map[string]Command {
 			Description: "Add main test files to directories with existing test files",
 			FlagUsage:   "",
 			Function:    addMainTests,
+		},
+		convertYamlToJSONCmd: {
+			Description: "Convert assignment.yml/yaml files to assignment.json",
+			FlagUsage:   "",
+			Function:    convertYamlToJSON,
 		},
 		helpCmd: {
 			Description: "Show help for commands",
