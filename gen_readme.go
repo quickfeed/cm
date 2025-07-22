@@ -15,7 +15,7 @@ import (
 const (
 	readmeTmplFile = "readme_tmpl.md"
 	readmeFile     = "README.md"
-	assignmentFile = "assignment.yml"
+	assignmentFile = "assignment.json"
 )
 
 // LabHeader contains a string representation of the content to be written as a lab header
@@ -91,20 +91,25 @@ func generateReadme(repo string, labs map[string][]string) map[int]*AssignmentIn
 	return assignments
 }
 
-// findLabsWithReadmeTmpl returns a map of labs with assignment.yml files
+// findLabsWithReadmeTmpl returns a map of labs with assignment.json files
 // and a slice of their corresponding readme_tmpl.md files.
 func findLabsWithReadmeTmpl(repo string) (map[string][]string, error) {
 	labs := make(map[string][]string)
 
-	// find all labs with assignment.yml files
+	// find all labs with assignment.json files and check for legacy files
 	err := filepath.WalkDir(repo, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
+		if d.IsDir() {
+			return nil
+		}
 		var emptySlice []string
-		if !d.IsDir() && d.Name() == assignmentFile {
+		if d.Name() == assignmentFile {
 			dir := filepath.Dir(path)
 			labs[dir] = emptySlice
+		} else if d.Name() == "assignment.yml" || d.Name() == "assignment.yaml" {
+			fmt.Printf("Warning: Found legacy '%s' file. Run 'cm convert-yaml-to-json' to convert.\n", path)
 		}
 		return nil
 	})
@@ -124,7 +129,7 @@ func findLabsWithReadmeTmpl(repo string) (map[string][]string, error) {
 			} else {
 				for level := 4; !found && level > 0; level-- {
 					// traverse up the hierarchy looking for existing lab dir
-					// with a previously recorded assignment.yml file;
+					// with a previously recorded assignment.json file;
 					// stop when level reach 0
 					dir := filepath.Dir(dir)
 					if _, found = labs[dir]; found {
@@ -144,7 +149,7 @@ func findLabsWithReadmeTmpl(repo string) (map[string][]string, error) {
 	return labs, nil
 }
 
-// parseAssignmentHeader returns a header by parsing assignment.yml.
+// parseAssignmentHeader returns a header by parsing assignment.json.
 func parseAssignmentHeader(lab, headerTemplate string, assignments map[int]*AssignmentInfo) string {
 	assignment, err := parseAssignment(filepath.Join(lab, assignmentFile))
 	check(err)
@@ -152,7 +157,7 @@ func parseAssignmentHeader(lab, headerTemplate string, assignments map[int]*Assi
 	// make sure all assignments has CourseOrg field set
 	assignment.CourseOrg = course()
 	if _, found := assignments[assignment.Order]; !found {
-		// add to assignments only once; this is since the assignment.yml
+		// add to assignments only once; this is since the assignment.json
 		// may exist for multiple versions of the same assignment README.md.
 		assignments[assignment.Order] = assignment
 	}

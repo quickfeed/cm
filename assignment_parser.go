@@ -1,12 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
 	"time"
-
-	"github.com/goccy/go-yaml"
 )
 
 const (
@@ -18,7 +17,7 @@ const (
 	defaultGroup      = "Group"
 )
 
-// AssignmentInfo contains fields present in the assignment.yml files which accompany each lab.
+// AssignmentInfo contains fields present in the assignment.json files which accompany each lab.
 type AssignmentInfo struct {
 	Order         int
 	Name          string
@@ -44,15 +43,15 @@ type AssignmentInfo struct {
 }
 
 func parseAssignment(filename string) (*AssignmentInfo, error) {
-	marshalledYml, err := os.ReadFile(filename)
+	jsonFile, err := os.ReadFile(filename)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read yaml file: %w", err)
+		return nil, fmt.Errorf("failed to read json file: %w", err)
 	}
 
 	res := &AssignmentInfo{}
-	err = yaml.Unmarshal(marshalledYml, res)
+	err = json.Unmarshal(jsonFile, res)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal yaml: %w", err)
+		return nil, fmt.Errorf("failed to unmarshal json: %w", err)
 	}
 
 	if res.Subject == "" {
