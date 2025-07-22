@@ -26,7 +26,7 @@ const (
 // Command represents a single command with its description and function
 type Command struct {
 	Description string
-	Usage       string
+	FlagUsage   string
 	Function    func([]string)
 }
 
@@ -35,67 +35,67 @@ func getCommands() map[string]Command {
 	return map[string]Command{
 		initEnvCmd: {
 			Description: "Initialize environment variables for the course",
-			Usage:       "cm init-env -year <year> -name <course-name> [-course <course-code>] [-discord-join-url <url>] [-bot-user <username>]",
+			FlagUsage:   "-year <year> -name <course-name> [-course <course-code>] [-discord-join-url <url>] [-bot-user <username>]",
 			Function:    initEnv,
 		},
 		initReposCmd: {
 			Description: "Initialize course repositories (assignments, info, tests)",
-			Usage:       "cm init-repos",
+			FlagUsage:   "",
 			Function:    func([]string) { initRepos() },
 		},
 		listReposCmd: {
 			Description: "List all student and group repositories",
-			Usage:       "cm list-repos [-url]",
+			FlagUsage:   "[-url]",
 			Function:    listRepos,
 		},
 		cloneRepoCmd: {
 			Description: "Clone a specified repository or current user's repository",
-			Usage:       "cm clone-repo [-repo <repo-name>] [-pull]",
+			FlagUsage:   "[-repo <repo-name>] [-pull]",
 			Function:    cloneRepo,
 		},
 		cloneAllReposCmd: {
 			Description: "Clone all student and group repositories",
-			Usage:       "cm clone-all-repos",
+			FlagUsage:   "",
 			Function:    func([]string) { cloneAllRepos() },
 		},
 		updateDocTagsCmd: {
 			Description: "Update documentation tags in markdown files",
-			Usage:       "cm update-doc-tags -repo <assignments|tests|info>",
+			FlagUsage:   "-repo <assignments|tests|info>",
 			Function:    updateDocTags,
 		},
 		removeSolutionTagsCmd: {
 			Description: "Remove solution build tags from Go files",
-			Usage:       "cm remove-solution-tags -repo <assignments|tests>",
+			FlagUsage:   "-repo <assignments|tests>",
 			Function:    removeSolutionTags,
 		},
 		genReadmeCmd: {
 			Description: "Generate README.md files from readme_tmpl.md templates",
-			Usage:       "cm gen-readme",
+			FlagUsage:   "",
 			Function:    func([]string) { genReadme() },
 		},
 		genTestsJSONCmd: {
 			Description: "Generate tests.json files for lab assignments",
-			Usage:       "cm gen-tests-json [-view] -labs <lab1>",
+			FlagUsage:   "[-view] -labs <lab1>",
 			Function:    genTestsJSON,
 		},
 		renameLegacyTestsCmd: {
 			Description: "Rename legacy *_ag_test.go files to *_qf_test.go",
-			Usage:       "cm rename-tests",
+			FlagUsage:   "",
 			Function:    func([]string) { renameLegacyTests() },
 		},
 		addLintCheckersCmd: {
 			Description: "Add linter test files to specified lab folder",
-			Usage:       "cm add-lint-checkers -labs <lab1>",
+			FlagUsage:   "-labs <lab1>",
 			Function:    addLintCheckers,
 		},
 		addMainTestsCmd: {
 			Description: "Add main test files to directories with existing test files",
-			Usage:       "cm add-main-tests",
+			FlagUsage:   "",
 			Function:    func([]string) { addMainTests() },
 		},
 		helpCmd: {
 			Description: "Show help for commands",
-			Usage:       "cm help [command]",
+			FlagUsage:   "[command]",
 			Function:    showHelp,
 		},
 	}
@@ -155,7 +155,7 @@ func showHelp(args []string) {
 		return
 	}
 	fmt.Printf("Description: %s\n", command.Description)
-	fmt.Printf("Usage: %s\n", command.Usage)
+	fmt.Printf("Usage: cm %s %s\n", cmd, command.FlagUsage)
 }
 
 func exitErr(err error, msg string) {
