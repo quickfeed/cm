@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
+	"maps"
 	"os"
-	"sort"
+	"slices"
 )
 
 const (
@@ -84,7 +85,7 @@ func getCommands() map[string]Command {
 		genTestsJSONCmd: {
 			Name:        genTestsJSONCmd,
 			Description: "Generate tests.json files for lab assignments",
-			Usage:       "cm gen-tests-json -labs <lab1> <lab2> ...",
+			Usage:       "cm gen-tests-json [-view] -labs <lab1>",
 			Function:    genTestsJSON,
 		},
 		renameLegacyTestsCmd: {
@@ -95,8 +96,8 @@ func getCommands() map[string]Command {
 		},
 		addLintCheckersCmd: {
 			Name:        addLintCheckersCmd,
-			Description: "Add linter test files to specified lab folders",
-			Usage:       "cm add-lint-checkers -labs <lab1> <lab2> ...",
+			Description: "Add linter test files to specified lab folder",
+			Usage:       "cm add-lint-checkers -labs <lab1>",
 			Function:    addLintCheckers,
 		},
 		addMainTestsCmd: {
@@ -122,14 +123,10 @@ func main() {
 
 	cmd, args := os.Args[1], os.Args[2:]
 	commands := getCommands()
-	
-	// Look up command in registry
 	if command, exists := commands[cmd]; exists {
 		command.Function(args)
 		return
 	}
-	
-	// Handle unknown commands
 	fmt.Printf("Unknown command: %s\n", cmd)
 	usageMsg()
 }
@@ -138,30 +135,20 @@ func usageMsg() {
 	fmt.Println("Usage: cm <command> [options]")
 	fmt.Println()
 	fmt.Println("Available commands:")
-	
+
 	commands := getCommands()
-	
-	// Get sorted command names for consistent output
-	var commandNames []string
-	for cmd := range commands {
-		commandNames = append(commandNames, cmd)
-	}
-	sort.Strings(commandNames)
-	
-	// Find the longest command name for formatting
-	maxLen := 0
-	for _, cmd := range commandNames {
-		if len(cmd) > maxLen {
-			maxLen = len(cmd)
-		}
-	}
-	
-	// Print commands with descriptions
+	commandNames := slices.Sorted(maps.Keys(commands))
+	// find the longest command name for formatting
+	maxLen := len(slices.MaxFunc(commandNames, func(a, b string) int {
+		return len(a) - len(b)
+	}))
+
+	// print commands with descriptions in sorted order
 	for _, cmd := range commandNames {
 		command := commands[cmd]
 		fmt.Printf("  %-*s  %s\n", maxLen, command.Name, command.Description)
 	}
-	
+
 	fmt.Println()
 	fmt.Println("Use 'cm help <command>' for detailed help on a specific command.")
 	os.Exit(1)
@@ -172,7 +159,7 @@ func showHelp(args []string) {
 		usageMsg()
 		return
 	}
-	
+
 	cmd := args[0]
 	commands := getCommands()
 	command, exists := commands[cmd]
@@ -181,8 +168,6 @@ func showHelp(args []string) {
 		usageMsg()
 		return
 	}
-	
-	fmt.Printf("Command: %s\n", command.Name)
 	fmt.Printf("Description: %s\n", command.Description)
 	fmt.Printf("Usage: %s\n", command.Usage)
 }
