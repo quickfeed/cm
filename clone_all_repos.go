@@ -18,7 +18,7 @@ import (
 //
 // The student/group repositories for the current year are cloned into the directory
 // <year>/student-repos/<repo>.
-func cloneAllRepos() {
+func cloneAllRepos(_ []string) {
 	if err := loadEnv(); err != nil {
 		exitErr(err, "Error loading environment variables")
 	}

@@ -41,7 +41,7 @@ func getCommands() map[string]Command {
 		initReposCmd: {
 			Description: "Initialize course repositories (assignments, info, tests)",
 			FlagUsage:   "",
-			Function:    func([]string) { initRepos() },
+			Function:    initRepos,
 		},
 		listReposCmd: {
 			Description: "List all student and group repositories",
@@ -56,7 +56,7 @@ func getCommands() map[string]Command {
 		cloneAllReposCmd: {
 			Description: "Clone all student and group repositories",
 			FlagUsage:   "",
-			Function:    func([]string) { cloneAllRepos() },
+			Function:    cloneAllRepos,
 		},
 		updateDocTagsCmd: {
 			Description: "Update documentation tags in markdown files",
@@ -71,7 +71,7 @@ func getCommands() map[string]Command {
 		genReadmeCmd: {
 			Description: "Generate README.md files from readme_tmpl.md templates",
 			FlagUsage:   "",
-			Function:    func([]string) { genReadme() },
+			Function:    genReadme,
 		},
 		genTestsJSONCmd: {
 			Description: "Generate tests.json files for lab assignments",
@@ -81,7 +81,7 @@ func getCommands() map[string]Command {
 		renameLegacyTestsCmd: {
 			Description: "Rename legacy *_ag_test.go files to *_qf_test.go",
 			FlagUsage:   "",
-			Function:    func([]string) { renameLegacyTests() },
+			Function:    renameLegacyTests,
 		},
 		addLintCheckersCmd: {
 			Description: "Add linter test files to specified lab folder",
@@ -91,7 +91,7 @@ func getCommands() map[string]Command {
 		addMainTestsCmd: {
 			Description: "Add main test files to directories with existing test files",
 			FlagUsage:   "",
-			Function:    func([]string) { addMainTests() },
+			Function:    addMainTests,
 		},
 		helpCmd: {
 			Description: "Show help for commands",

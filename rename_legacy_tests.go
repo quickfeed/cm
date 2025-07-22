@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func renameLegacyTests() {
+func renameLegacyTests(_ []string) {
 	if err := renameTestFiles(gitRoot); err != nil {
 		exitErr(err, "Error renaming legacy test files")
 	}
