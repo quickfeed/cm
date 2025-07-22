@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 )
 
@@ -60,22 +59,14 @@ func convertSingleFile(yamlFilePath string) error {
 	if contentStr == "" {
 		return fmt.Errorf("empty YAML file")
 	}
-
-	// Convert YAML format to JSON format by adding quotes around keys
 	jsonContent := convertYamlKeysToJson(contentStr)
-	
-	// Wrap content with { } to make it JSON-like
-	jsonContent = "{" + jsonContent + "}"
 
-	// Validate that the result is valid JSON and marshal it back to ensure formatting
-	var jsonObj any
+	// Validate that the result is valid JSON without reordering
+	var jsonObj json.RawMessage
 	if err := json.Unmarshal([]byte(jsonContent), &jsonObj); err != nil {
 		return fmt.Errorf("resulting content is not valid JSON: %w", err)
 	}
-	jsonContentBytes, err := json.MarshalIndent(jsonObj, "", "  ")
-	if err != nil {
-		return fmt.Errorf("failed to marshal JSON: %w", err)
-	}
+	jsonContentBytes := []byte(jsonContent)
 
 	dir := filepath.Dir(yamlFilePath)
 	jsonFilePath := filepath.Join(dir, "assignment.json")
@@ -91,29 +82,17 @@ func convertSingleFile(yamlFilePath string) error {
 
 // convertYamlKeysToJson converts YAML key-value pairs to JSON format by adding quotes around keys
 func convertYamlKeysToJson(yamlContent string) string {
-	lines := strings.Split(yamlContent, "\n")
 	var jsonLines []string
-	
-	// Regex to match YAML key-value pairs (key: value)
-	keyValueRegex := regexp.MustCompile(`^(\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*(.*)$`)
-	
-	for _, line := range lines {
-		if keyValueRegex.MatchString(line) {
-			// Replace key: value with "key": value
-			matches := keyValueRegex.FindStringSubmatch(line)
-			if len(matches) == 4 {
-				indentation := matches[1]
-				key := matches[2]
-				value := matches[3]
-				jsonLines = append(jsonLines, fmt.Sprintf(`%s"%s": %s`, indentation, key, value))
-			} else {
-				jsonLines = append(jsonLines, line)
-			}
+	for line := range strings.Lines(yamlContent) {
+		key, val, found := strings.Cut(line, ":")
+		if found {
+			jsonLines = append(jsonLines, fmt.Sprintf(`  "%s": %s`, key, strings.TrimSpace(val)))
 		} else {
-			jsonLines = append(jsonLines, line)
+			// skip lines that do not match key-value pairs
+			fmt.Printf("Skipping line: %s\n", line)
+			continue
 		}
 	}
-	
-	// Join with commas for JSON format
-	return strings.Join(jsonLines, ",\n")
+	// Join with commas and newlines for proper JSON format
+	return "{\n" + strings.Join(jsonLines, ",\n") + "\n}"
 }
