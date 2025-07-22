@@ -43,13 +43,13 @@ type AssignmentInfo struct {
 }
 
 func parseAssignment(filename string) (*AssignmentInfo, error) {
-	marshalledJSON, err := os.ReadFile(filename)
+	jsonFile, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read json file: %w", err)
 	}
 
 	res := &AssignmentInfo{}
-	err = json.Unmarshal(marshalledJSON, res)
+	err = json.Unmarshal(jsonFile, res)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal json: %w", err)
 	}

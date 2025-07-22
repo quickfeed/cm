@@ -112,6 +112,20 @@ func findLabsWithReadmeTmpl(repo string) (map[string][]string, error) {
 		return nil, err
 	}
 
+	// check for legacy assignment.yml or assignment.yaml files and warn users
+	err = filepath.WalkDir(repo, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !d.IsDir() && (d.Name() == "assignment.yml" || d.Name() == "assignment.yaml") {
+			fmt.Printf("Warning: Found legacy assignment file '%s'. Please convert it to assignment.json format.\n", path)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	// find all corresponding readme_tmpl.md files
 	err = filepath.WalkDir(repo, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
