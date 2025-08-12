@@ -121,6 +121,7 @@ func main() {
 	}
 	fmt.Printf("Unknown command: %s\n", cmd)
 	usageMsg()
+	os.Exit(1)
 }
 
 func usageMsg() {
@@ -143,7 +144,6 @@ func usageMsg() {
 
 	fmt.Println()
 	fmt.Println("Use 'cm help <command>' for detailed help on a specific command.")
-	os.Exit(1)
 }
 
 func showHelp(args []string) {
