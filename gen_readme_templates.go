@@ -33,6 +33,6 @@ const labPlanTemplate = `{{- $assignment := index . 1}}
 | {{ $a.Order }} | [{{ $a.Title }}][{{ $a.Order }}] | {{ $a.Grading }} | {{ $a.ApproveType }} | {{ $a.SubmissionType }} | {{ $a.ShortDeadline }} |
 {{- end}}
 {{range $index, $a := .}}
-[{{ $a.Order }}]: https://github.com/{{$course}}-{{$year}}/assignments/tree/main/lab{{ $a.Order }}
+[{{ $a.Order }}]: https://github.com/{{$course}}-{{$year}}/assignments/tree/main/{{ $a.Name }}
 {{- end}}
 `
