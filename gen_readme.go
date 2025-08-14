@@ -183,17 +183,20 @@ func generateToC(readme string) []string {
 var funcMap = template.FuncMap{
 	"link": func(heading string) string {
 		replace := map[string]string{
-			" ": "-",
-			"#": "",
-			"`": "",
-			":": "",
-			"/": "",
-			".": "",
-			",": "",
-			"(": "",
-			")": "",
-			"&": "",
-			"+": "",
+			" ":  "-",
+			"#":  "",
+			"`":  "",
+			":":  "",
+			"/":  "",
+			".":  "",
+			",":  "",
+			"(":  "",
+			")":  "",
+			"&":  "",
+			"**": "",
+			"+":  "",
+			"?":  "",
+			"=":  "",
 		}
 		str := strings.ToLower(heading)
 		for old, new := range replace {
