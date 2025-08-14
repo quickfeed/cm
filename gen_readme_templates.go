@@ -9,7 +9,9 @@ const headerTemplate = `# Lab {{ .Order }}: {{ .Title }}
 | ---------------------    | --------------------- |
 | Subject:                 | {{ .Subject }} |
 | Deadline:                | **{{ .Deadline }}** |
-| Expected effort:         | {{ .HoursMin -}}-{{- .HoursMax}} hours |
+{{- if .Effort }}
+| Expected effort:         | {{ .Effort }} |
+{{- end }}
 | Grading:                 | {{ .Grading }} |
 | Submission:              | {{ .SubmissionType }} |
 `

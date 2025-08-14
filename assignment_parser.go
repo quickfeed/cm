@@ -32,6 +32,7 @@ type AssignmentInfo struct {
 	Title         string
 	HoursMin      int
 	HoursMax      int
+	Effort        string // replaces the HoursMin-HoursMax
 	// defaults to $COURSE $NAME
 	Subject string
 	// defaults to defaultGrading
@@ -77,6 +78,12 @@ func parseAssignment(filename string) (*AssignmentInfo, error) {
 		res.SubmissionType = defaultGroup
 	} else {
 		res.SubmissionType = defaultIndividual
+	}
+
+	if res.Effort == "" {
+		if res.HoursMin > 0 && res.HoursMax > 0 {
+			res.Effort = fmt.Sprintf("%d-%d hours", res.HoursMin, res.HoursMax)
+		}
 	}
 
 	// copied from qf.TimeLayout
