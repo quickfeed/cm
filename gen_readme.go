@@ -180,6 +180,30 @@ func generateToC(readme string) []string {
 	return headings
 }
 
+func headerLabels(data *AssignmentInfo) []string {
+	labels := []string{
+		fmt.Sprintf("Lab %d:", data.Order),
+		"Subject:",
+		"Deadline:",
+	}
+	if data.Effort != "" {
+		labels = append(labels, "Expected effort:")
+	}
+	return append(labels, "Grading:", "Submission:")
+}
+
+func headerValues(data *AssignmentInfo) []string {
+	values := []string{
+		data.Title,
+		data.Subject,
+		fmt.Sprintf("**%s**", data.Deadline),
+	}
+	if data.Effort != "" {
+		values = append(values, data.Effort)
+	}
+	return append(values, data.Grading, data.SubmissionType)
+}
+
 var funcMap = template.FuncMap{
 	"link": func(heading string) string {
 		replace := map[string]string{
@@ -216,6 +240,27 @@ var funcMap = template.FuncMap{
 	},
 	"trimPrefix": func(s, prefix string) string {
 		return strings.TrimPrefix(s, prefix)
+	},
+	"headerLabels": headerLabels,
+	"headerValues": headerValues,
+	"col1Width": func(data *AssignmentInfo) int {
+		return len(slices.MaxFunc(headerLabels(data), func(a, b string) int {
+			return len(a) - len(b)
+		}))
+	},
+	"col2Width": func(data *AssignmentInfo) int {
+		return len(slices.MaxFunc(headerValues(data), func(a, b string) int {
+			return len(a) - len(b)
+		}))
+	},
+	"padRight": func(s string, width int) string {
+		if len(s) >= width {
+			return s
+		}
+		return s + strings.Repeat(" ", width-len(s))
+	},
+	"separator": func(width int) string {
+		return strings.Repeat("-", width)
 	},
 }
 

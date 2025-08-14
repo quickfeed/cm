@@ -4,16 +4,17 @@ const titleOnlyHeaderTemplate = `# Lab {{ .Order }}: {{ .Title }}
 `
 
 const headerTemplate = `# Lab {{ .Order }}: {{ .Title }}
-
-| Lab {{ .Order }}: | {{ .Title }} |
-| ---------------------    | --------------------- |
-| Subject:                 | {{ .Subject }} |
-| Deadline:                | **{{ .Deadline }}** |
-{{- if .Effort }}
-| Expected effort:         | {{ .Effort }} |
+{{- $col1Width := col1Width . }}
+{{- $col2Width := col2Width . }}
+{{- $labels := headerLabels . }}
+{{- $values := headerValues . }}
+{{range $index, $label := $labels }}
+{{- $value := index $values $index }}
+| {{ padRight $label $col1Width }} | {{ padRight $value $col2Width }} |
+{{- if eq $index 0 }}
+| {{ separator $col1Width }} | {{ separator $col2Width }} |
 {{- end }}
-| Grading:                 | {{ .Grading }} |
-| Submission:              | {{ .SubmissionType }} |
+{{- end }}
 `
 
 const tocTemplate = `{{- .LabHeader }}
