@@ -3,13 +3,13 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"html/template"
 	"maps"
 	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
 	"strings"
+	"text/template"
 )
 
 const (
@@ -165,16 +165,16 @@ func parseAssignmentHeader(lab, headerTemplate string, assignments map[int]*Assi
 }
 
 // generateToC takes a markdown file and generates a table of contents
-// of all level two headings.
+// of all level two and three headings, preserving the heading level.
 func generateToC(readme string) []string {
 	// this reg exp became a bit nasty since we want to match with backtick
 	legalHeadingChars := `\w\s\/:#-` + "`"
-	headingRegExp := regexp.MustCompile(`^#{2,3}\s([` + legalHeadingChars + `]+)$`)
+	headingRegExp := regexp.MustCompile(`^(#{2,3})\s([` + legalHeadingChars + `]+)$`)
 	headings := make([]string, 0)
 	for line := range strings.SplitSeq(readme, "\n") {
 		if headingRegExp.MatchString(line) {
-			headingText := headingRegExp.ReplaceAllString(line, "$1")
-			headings = append(headings, headingText)
+			// Keep the full heading with level markers
+			headings = append(headings, line)
 		}
 	}
 	return headings
@@ -188,6 +188,11 @@ var funcMap = template.FuncMap{
 			"`": "",
 			":": "",
 			"/": "",
+			".": "",
+			"(": "",
+			")": "",
+			"&": "",
+			"+": "",
 		}
 		str := strings.ToLower(heading)
 		for old, new := range replace {
@@ -195,8 +200,18 @@ var funcMap = template.FuncMap{
 		}
 		return str
 	},
+	"escapeText": func(heading string) string {
+		// Escape & to \& for markdown link text
+		return strings.ReplaceAll(heading, "&", "\\&")
+	},
 	"inc": func(i int) int {
 		return i + 1
+	},
+	"hasPrefix": func(s, prefix string) bool {
+		return strings.HasPrefix(s, prefix)
+	},
+	"trimPrefix": func(s, prefix string) string {
+		return strings.TrimPrefix(s, prefix)
 	},
 }
 

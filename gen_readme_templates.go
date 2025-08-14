@@ -16,8 +16,16 @@ const headerTemplate = `# Lab {{ .Order }}: {{ .Title }}
 
 const tocTemplate = `{{- .LabHeader }}
 ## Table of Contents
-{{range $index, $heading := slice .ToC 1}}
-{{inc $index}}. [{{$heading}}](#{{link $heading}})
+
+- [Table of Contents](#table-of-contents)
+{{- range $index, $heading := slice .ToC 1}}
+{{- if hasPrefix $heading "## "}}
+- [{{escapeText (trimPrefix $heading "## ")}}](#{{link (trimPrefix $heading "## ")}})
+{{- else if hasPrefix $heading "### "}}
+  - [{{escapeText (trimPrefix $heading "### ")}}](#{{link (trimPrefix $heading "### ")}})
+{{- else}}
+- [{{escapeText $heading}}](#{{link $heading}})
+{{- end}}
 {{- end}}
 
 `
