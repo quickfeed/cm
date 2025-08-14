@@ -58,10 +58,12 @@ func parseAssignment(filename string) (*AssignmentInfo, error) {
 		res.Subject = fmt.Sprintf("%s %s", strings.ToUpper(course()), name())
 	}
 
-	if res.AutoApprove {
-		res.ApproveType = defaultAuto
-	} else {
-		res.ApproveType = defaultManual
+	if res.ApproveType == "" {
+		if res.AutoApprove {
+			res.ApproveType = defaultAuto
+		} else {
+			res.ApproveType = defaultManual
+		}
 	}
 
 	switch res.Grading {
