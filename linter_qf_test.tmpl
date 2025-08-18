@@ -39,7 +39,7 @@ func Test0Lint(t *testing.T) {
 	sc := scores.Max()
 	defer sc.Print(t)
 
-	run(t, sc, "golangci-lint run --tests=false --show-stats=false --disable errcheck", "Lint checker failed")
+	run(t, sc, "golangci-lint run --show-stats=false --disable errcheck", "Lint checker failed")
 }
 
 func Test0VetCheck(t *testing.T) {
