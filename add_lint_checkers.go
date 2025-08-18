@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"go/parser"
@@ -22,8 +23,8 @@ func addLintCheckers(args []string) {
 		exitErr(err, "Error parsing flags")
 	}
 	for dir := range strings.SplitSeq(labs, " ") {
-		if !hasStudentGoCode(dir) {
-			fmt.Printf("Skipping %s (no student Go code found)\n", dir)
+		if isLintDisabled(dir) {
+			fmt.Printf("Skipping %s (lint disabled in assignment.json)\n", dir)
 			continue
 		}
 		fmt.Printf("Updating %q in %s\n", lintFile, courseRepoPath(dir))
@@ -33,23 +34,27 @@ func addLintCheckers(args []string) {
 	}
 }
 
-// hasStudentGoCode checks if the directory contains Go files that are not quickfeed test files.
-// Returns true if there are Go files that don't end with "_qf_test.go".
-func hasStudentGoCode(dir string) bool {
-	entries, err := os.ReadDir(dir)
+// Assignment represents the structure of assignment.json file
+type Assignment struct {
+	DisableLint bool `json:"disable-lint"`
+}
+
+// isLintDisabled checks if lint is disabled for the given directory
+// by reading the assignment.json file and checking the disable-lint flag.
+func isLintDisabled(dir string) bool {
+	assignmentPath := filepath.Join(dir, "assignment.json")
+	data, err := os.ReadFile(assignmentPath)
 	if err != nil {
+		// If we can't read the assignment.json file, assume lint is not disabled
 		return false
 	}
-	for _, entry := range entries {
-		if entry.IsDir() {
-			continue
-		}
-		name := entry.Name()
-		if filepath.Ext(name) == ".go" && !strings.HasSuffix(name, "_qf_test.go") {
-			return true
-		}
+
+	var assignment Assignment
+	if err := json.Unmarshal(data, &assignment); err != nil {
+		// If we can't parse the JSON, assume lint is not disabled
+		return false
 	}
-	return false
+	return assignment.DisableLint
 }
 
 type GoTemplateConfig struct {
