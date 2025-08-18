@@ -22,11 +22,34 @@ func addLintCheckers(args []string) {
 		exitErr(err, "Error parsing flags")
 	}
 	for dir := range strings.SplitSeq(labs, " ") {
+		if !hasStudentGoCode(dir) {
+			fmt.Printf("Skipping %s (no student Go code found)\n", dir)
+			continue
+		}
 		fmt.Printf("Updating %q in %s\n", lintFile, courseRepoPath(dir))
 		if err := generateGoFromTemplate(dir, lintFile, lintTmplFile, linterTmplFS); err != nil {
 			exitErr(err, "Error generating linter test")
 		}
 	}
+}
+
+// hasStudentGoCode checks if the directory contains Go files that are not quickfeed test files.
+// Returns true if there are Go files that don't end with "_qf_test.go".
+func hasStudentGoCode(dir string) bool {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return false
+	}
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		name := entry.Name()
+		if filepath.Ext(name) == ".go" && !strings.HasSuffix(name, "_qf_test.go") {
+			return true
+		}
+	}
+	return false
 }
 
 type GoTemplateConfig struct {
