@@ -69,8 +69,9 @@ func generateGoFromTemplate(dir, file, tmplFile string, tmplFS fs.FS) error {
 
 // packageName returns the package name of the first Go file in the given directory.
 // If no Go files are found, the base directory name is returned.
+// If the directory name starts with a number, it's prefixed with "lab".
 func packageName(dir string) string {
-	noPkg := filepath.Base(dir)
+	noPkg := ensureValidPackageName(filepath.Base(dir))
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return noPkg
@@ -85,8 +86,17 @@ func packageName(dir string) string {
 				// if we can't parse the file, try the next one
 				continue
 			}
-			return f.Name.Name
+			return ensureValidPackageName(f.Name.Name)
 		}
 	}
 	return noPkg
+}
+
+// ensureValidPackageName ensures the package name is valid by prefixing with "lab"
+// if the name starts with a number.
+func ensureValidPackageName(name string) string {
+	if len(name) > 0 && name[0] >= '0' && name[0] <= '9' {
+		return "lab" + name
+	}
+	return name
 }
