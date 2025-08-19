@@ -51,21 +51,37 @@ func walkRepo(path string) error {
 	return nil
 }
 
-var solutionTag = []byte("//go:build !solution\n")
+var (
+	negativeSolutionTag = []byte("//go:build !solution\n")
+	positiveSolutionTag = []byte("//go:build solution\n")
+)
 
 func removeSolutionTag(file string) error {
 	content, err := os.ReadFile(file)
 	if err != nil {
 		return err
 	}
+
+	var tagToRemove []byte
+	var found bool
 	for line := range bytes.Lines(content) {
-		if !bytes.HasPrefix(line, solutionTag) {
-			return nil
+		if bytes.HasPrefix(line, negativeSolutionTag) {
+			tagToRemove = negativeSolutionTag
+			found = true
+			break
 		}
-		break
+		if bytes.HasPrefix(line, positiveSolutionTag) {
+			tagToRemove = positiveSolutionTag
+			found = true
+			break
+		}
 	}
+	if !found {
+		return nil
+	}
+
 	fmt.Printf("Removing solution build tag from %s\n", lastDirFile(file))
 	// remove the solution tag and write the updated content back to the file
-	content = content[len(solutionTag)+1:] // skip the solution tag and the extra newline
+	content = content[len(tagToRemove)+1:] // skip the solution tag and the extra newline
 	return os.WriteFile(file, content, 0o644)
 }
