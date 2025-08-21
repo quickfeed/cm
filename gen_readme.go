@@ -235,6 +235,9 @@ var funcMap = template.FuncMap{
 	"inc": func(i int) int {
 		return i + 1
 	},
+	"add": func(a, b int) int {
+		return a + b
+	},
 	"hasPrefix": func(s, prefix string) bool {
 		return strings.HasPrefix(s, prefix)
 	},
@@ -258,6 +261,15 @@ var funcMap = template.FuncMap{
 			return s
 		}
 		return s + strings.Repeat(" ", width-len(s))
+	},
+	"center": func(s string, width int) string {
+		if len(s) >= width {
+			return s
+		}
+		padding := width - len(s)
+		leftPad := padding / 2
+		rightPad := padding - leftPad
+		return strings.Repeat(" ", leftPad) + s + strings.Repeat(" ", rightPad)
 	},
 	"separator": func(width int) string {
 		return strings.Repeat("-", width)
