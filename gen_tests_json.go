@@ -74,9 +74,6 @@ func genTestsJSON(args []string) {
 		// The ./... because some labs contain several subdirectories with tests.
 		// Running without the -v flag, it will suppress the output and we won't get the JSON.
 		scoreList, err := runCommandWithOutput[[]score](courseRepoPath(dir), strings.Split(testRunnerCmd, " ")...)
-		if scoreList == nil {
-			exitErr(fmt.Errorf("no score objects found for %q", dir), errMsg)
-		}
 		if err != nil {
 			fmt.Printf("Error running %q for %s: %v\n", testRunnerCmd, dir, err)
 			fmt.Printf("You may want to run %q manually to debug the issue.\n", testRunnerCmd)
@@ -84,6 +81,12 @@ func genTestsJSON(args []string) {
 			// file even if the command fails. This is usually fine since the empty score
 			// objects that we need are usually printed at the start of the test output.
 			// The exception could be if there was a compile error or panic situation.
+		}
+
+		// Skip generating tests.json if there are no tests
+		if len(scoreList) == 0 {
+			fmt.Printf("No tests found for %s, skipping %s generation\n", dir, testsJSONFile)
+			continue
 		}
 
 		scoreList = deduplicateScores(scoreList)
