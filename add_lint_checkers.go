@@ -27,6 +27,10 @@ func addLintCheckers(args []string) {
 			fmt.Printf("Skipping %s (lint disabled in assignment.json)\n", dir)
 			continue
 		}
+		if !hasNonTestGoFiles(dir) {
+			fmt.Printf("Skipping %s (no non-test Go files found)\n", dir)
+			continue
+		}
 		fmt.Printf("Updating %q in %s\n", lintFile, courseRepoPath(dir))
 		if err := generateGoFromTemplate(dir, lintFile, lintTmplFile, linterTmplFS); err != nil {
 			exitErr(err, "Error generating linter test")
@@ -55,6 +59,30 @@ func isLintDisabled(dir string) bool {
 		return false
 	}
 	return assignment.DisableLint
+}
+
+// hasNonTestGoFiles checks if the given directory or its subdirectories contain any non-test Go files.
+// Returns true if at least one .go file is found that doesn't end with "_test.go".
+func hasNonTestGoFiles(dir string) bool {
+	var found bool
+	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return nil // continue walking even if there's an error with a specific file/dir
+		}
+		if d.IsDir() {
+			return nil // continue into subdirectories
+		}
+		name := d.Name()
+		if filepath.Ext(name) == ".go" && !strings.HasSuffix(name, "_test.go") {
+			found = true
+			return filepath.SkipAll // stop walking once we find a non-test Go file
+		}
+		return nil
+	})
+	if err != nil {
+		return false
+	}
+	return found
 }
 
 type GoTemplateConfig struct {
