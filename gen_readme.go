@@ -189,6 +189,9 @@ func headerLabels(data *AssignmentInfo) []string {
 	if data.Effort != "" {
 		labels = append(labels, "Expected effort:")
 	}
+	if data.ScoreLimit > 0 {
+		labels = append(labels, "Score limit:")
+	}
 	return append(labels, "Grading:", "Submission:")
 }
 
@@ -200,6 +203,9 @@ func headerValues(data *AssignmentInfo) []string {
 	}
 	if data.Effort != "" {
 		values = append(values, data.Effort)
+	}
+	if data.ScoreLimit > 0 {
+		values = append(values, fmt.Sprintf("%d", data.ScoreLimit))
 	}
 	return append(values, data.Grading, data.SubmissionType)
 }
