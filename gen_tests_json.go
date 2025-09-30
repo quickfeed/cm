@@ -44,6 +44,29 @@ func deduplicateScores(scores []score) []score {
 	return uniqueScores
 }
 
+// formatCompactJSON formats the score slice as JSON with each test entry on a single line
+func formatCompactJSON(scores []score) ([]byte, error) {
+	var lines []string
+	lines = append(lines, "[")
+
+	for i, s := range scores {
+		// Marshal each score object to a single line
+		data, err := json.Marshal(s)
+		if err != nil {
+			return nil, err
+		}
+
+		line := "  " + string(data)
+		if i < len(scores)-1 {
+			line += ","
+		}
+		lines = append(lines, line)
+	}
+
+	lines = append(lines, "]")
+	return []byte(strings.Join(lines, "\n") + "\n"), nil
+}
+
 func genTestsJSON(args []string) {
 	fs := flag.NewFlagSet(genTestsJSONCmd, flag.ExitOnError)
 	labs := fs.String("labs", "", "Lab folders to generate tests.json for (space separated)")
@@ -99,7 +122,12 @@ func genTestsJSON(args []string) {
 		}
 		defer f.Close()
 
-		if err := json.NewEncoder(f).Encode(scoreList); err != nil {
+		// Use custom formatter to keep each test entry on a single line
+		jsonData, err := formatCompactJSON(scoreList)
+		if err != nil {
+			exitErr(err, errMsg)
+		}
+		if _, err := f.Write(jsonData); err != nil {
 			exitErr(err, errMsg)
 		}
 		fmt.Printf("Generated %s for %s\n", testsJSONFile, courseRepoPath(dir))
