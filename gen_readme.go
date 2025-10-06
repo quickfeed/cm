@@ -164,17 +164,27 @@ func parseAssignmentHeader(lab, headerTemplate string, assignments map[int]*Assi
 	return mustExecute(parseTemplate("assignment", headerTemplate), assignment)
 }
 
+// stripMarkdownLinks removes markdown link syntax [text](url) from a string,
+// keeping only the text content.
+func stripMarkdownLinks(text string) string {
+	// Remove markdown links [text](url) and keep only the text
+	linkRegExp := regexp.MustCompile(`\[([^\]]+)\]\([^)]+\)`)
+	return linkRegExp.ReplaceAllString(text, "$1")
+}
+
 // generateToC takes a markdown file and generates a table of contents
 // of all level two and three headings, preserving the heading level.
 func generateToC(readme string) []string {
 	// this reg exp became a bit nasty since we want to match with backtick
-	legalHeadingChars := `\w\s\/:#-` + "`"
+	// now also includes parentheses and square brackets for markdown links
+	legalHeadingChars := `\w\s\/:#-\[\]()` + "`"
 	headingRegExp := regexp.MustCompile(`^(#{2,3})\s([` + legalHeadingChars + `]+)$`)
 	headings := make([]string, 0)
 	for line := range strings.SplitSeq(readme, "\n") {
 		if headingRegExp.MatchString(line) {
-			// Keep the full heading with level markers
-			headings = append(headings, line)
+			// Strip markdown links from the heading before adding to ToC
+			cleanedLine := stripMarkdownLinks(line)
+			headings = append(headings, cleanedLine)
 		}
 	}
 	return headings
@@ -212,6 +222,10 @@ func headerValues(data *AssignmentInfo) []string {
 
 var funcMap = template.FuncMap{
 	"link": func(heading string) string {
+		// First strip any remaining markdown links
+		linkRegExp := regexp.MustCompile(`\[([^\]]+)\]\([^)]+\)`)
+		heading = linkRegExp.ReplaceAllString(heading, "$1")
+
 		replace := map[string]string{
 			" ":  "-",
 			"#":  "",
@@ -222,6 +236,8 @@ var funcMap = template.FuncMap{
 			",":  "",
 			"(":  "",
 			")":  "",
+			"[":  "",
+			"]":  "",
 			"&":  "",
 			"**": "",
 			"+":  "",
@@ -232,9 +248,14 @@ var funcMap = template.FuncMap{
 		for old, new := range replace {
 			str = strings.ReplaceAll(str, old, new)
 		}
+		// Clean up double dashes that can occur when & is between spaces
+		str = strings.ReplaceAll(str, "--", "-")
 		return str
 	},
 	"escapeText": func(heading string) string {
+		// First strip any markdown links
+		linkRegExp := regexp.MustCompile(`\[([^\]]+)\]\([^)]+\)`)
+		heading = linkRegExp.ReplaceAllString(heading, "$1")
 		// Escape & to \& for markdown link text
 		return strings.ReplaceAll(heading, "&", "\\&")
 	},
