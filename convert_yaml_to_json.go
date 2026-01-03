@@ -59,7 +59,7 @@ func convertSingleFile(yamlFilePath string) error {
 	if contentStr == "" {
 		return fmt.Errorf("empty YAML file")
 	}
-	jsonContent := convertYamlKeysToJson(contentStr)
+	jsonContent := convertYamlKeysToJSON(contentStr)
 
 	// Validate that the result is valid JSON without reordering
 	var jsonObj json.RawMessage
@@ -80,8 +80,8 @@ func convertSingleFile(yamlFilePath string) error {
 	return nil
 }
 
-// convertYamlKeysToJson converts YAML key-value pairs to JSON format by adding quotes around keys
-func convertYamlKeysToJson(yamlContent string) string {
+// convertYamlKeysToJSON converts YAML key-value pairs to JSON format by adding quotes around keys
+func convertYamlKeysToJSON(yamlContent string) string {
 	var jsonLines []string
 	for line := range strings.Lines(yamlContent) {
 		key, val, found := strings.Cut(line, ":")

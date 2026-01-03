@@ -52,7 +52,7 @@ func getRepositories(org string) ([]repositoryInfo, error) {
 	if err != nil {
 		exitErr(err, "Error fetching repositories")
 	}
-	if repos == nil || len(repos) == 0 {
+	if len(repos) == 0 {
 		exitErr(fmt.Errorf("no repositories found"), "Error listing repositories")
 	}
 	return repos, nil
