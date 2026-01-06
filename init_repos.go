@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 )
 
 var (
@@ -40,12 +41,28 @@ func initGitRepository(workingDir, ghOrg, repo string) error {
 		{"git", "branch", "-M", "main"},
 		{"git", "remote", "add", "origin", gitURL(ghOrg, repo)},
 	}
+
+	// Try to pull if remote has content
+	if remoteHasContent(workingDir, "origin", "main") {
+		commands = append(commands,
+			[]string{"git", "pull", "origin", "main"},
+			[]string{"git", "branch", "--set-upstream-to=origin/main", "main"},
+		)
+	}
+
 	for _, cmd := range commands {
 		if err := runCommand(workingDir, cmd...); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func remoteHasContent(workingDir, remote, branch string) bool {
+	cmd := exec.Command("git", "ls-remote", "--heads", remote, branch)
+	cmd.Dir = workingDir
+	output, err := cmd.Output()
+	return err == nil && len(output) > 0
 }
 
 func gitURL(ghOrg, repo string) string {
