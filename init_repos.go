@@ -36,31 +36,38 @@ func initRepos(_ []string) {
 }
 
 func initGitRepository(workingDir, ghOrg, repo string) error {
-	commands := [][]string{
+	remoteURL := gitURL(ghOrg, repo)
+
+	// Initialize repository and add remote
+	initCommands := [][]string{
 		{"git", "init"},
 		{"git", "branch", "-M", "main"},
-		{"git", "remote", "add", "origin", gitURL(ghOrg, repo)},
+		{"git", "remote", "add", "origin", remoteURL},
 	}
-
-	// Try to pull if remote has content
-	if remoteHasContent(workingDir, "origin", "main") {
-		commands = append(commands,
-			[]string{"git", "pull", "origin", "main"},
-			[]string{"git", "branch", "--set-upstream-to=origin/main", "main"},
-		)
-	}
-
-	for _, cmd := range commands {
+	for _, cmd := range initCommands {
 		if err := runCommand(workingDir, cmd...); err != nil {
 			return err
 		}
 	}
+
+	// Try to pull if remote has content
+	if remoteHasContent(remoteURL, "main") {
+		pullCommands := [][]string{
+			{"git", "pull", "origin", "main"},
+			{"git", "branch", "--set-upstream-to=origin/main", "main"},
+		}
+		for _, cmd := range pullCommands {
+			if err := runCommand(workingDir, cmd...); err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }
 
-func remoteHasContent(workingDir, remote, branch string) bool {
-	cmd := exec.Command("git", "ls-remote", "--heads", remote, branch)
-	cmd.Dir = workingDir
+func remoteHasContent(remoteURL, branch string) bool {
+	cmd := exec.Command("git", "ls-remote", "--heads", remoteURL, branch)
 	output, err := cmd.Output()
 	return err == nil && len(output) > 0
 }
