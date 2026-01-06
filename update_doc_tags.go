@@ -59,7 +59,7 @@ func replaceTags(path string) error {
 		if err != nil {
 			return err
 		}
-		if !d.IsDir() && strings.HasSuffix(filePath, ".md") {
+		if !d.IsDir() && (strings.HasSuffix(filePath, ".md") || strings.HasSuffix(filePath, ".html")) {
 			return updateFile(filePath, replacements)
 		}
 		return nil
