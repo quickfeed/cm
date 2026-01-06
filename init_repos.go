@@ -21,6 +21,17 @@ func repoName(internalName string) string {
 	return internalName
 }
 
+// orgName returns the GitHub organization name for the given internal name.
+// For the website repository, it returns just the course name (without year)
+// since the website is shared across multiple years.
+// For other repositories, it returns the course organization with the year.
+func orgName(internalName string) string {
+	if internalName == "website" {
+		return course()
+	}
+	return courseOrg()
+}
+
 // initRepos initializes the course repositories so that they are
 // ready to be populated with data from the main course repository.
 // Once the repositories are initialized, they are ready to be pushed
@@ -39,8 +50,7 @@ func initRepos(_ []string) {
 		if err := os.MkdirAll(path, os.ModePerm); err != nil {
 			exitErr(err, "Error creating repository directory")
 		}
-		actualRepoName := repoName(repo)
-		if err := initGitRepository(path, courseOrg(), actualRepoName); err != nil {
+		if err := initGitRepository(path, orgName(repo), repoName(repo)); err != nil {
 			exitErr(err, "Error initializing git repository")
 		}
 	}
