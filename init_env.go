@@ -28,12 +28,14 @@ func initEnv(args []string) {
 		courseName     string
 		discordJoinURL string
 		botUser        string
+		websiteRepo    string
 	)
 	fs.IntVar(&year, "year", 0, "Course year (required)")
 	fs.StringVar(&courseName, "name", "", "Course name (required)")
 	fs.StringVar(&course, "course", "", "Course code (default: git repo name)")
 	fs.StringVar(&discordJoinURL, "discord-join-url", "", "Discord join URL")
 	fs.StringVar(&botUser, "bot-user", "", "Help bot user (default: helpbot)")
+	fs.StringVar(&websiteRepo, "website-repo", "", "Website repository name (default: $COURSE.github.io)")
 
 	if err := fs.Parse(args); err != nil {
 		exitErr(err, "Error parsing flags")
@@ -192,15 +194,21 @@ func courseOrg() string {
 	return cmp.Or(os.Getenv("COURSE_ORG"), os.ExpandEnv("$COURSE-$YEAR"))
 }
 
+func websiteRepo() string {
+	return os.ExpandEnv(cmp.Or(os.Getenv("WEBSITE_REPO"), defaultValues["WEBSITE_REPO"]))
+}
+
 func replacements() map[string]string {
 	return map[string]string{
 		"COURSE_NAME":      name(),
 		"COURSE_ORG":       courseOrg(),
 		"BOT_USER":         cmp.Or(os.Getenv("BOT_USER"), defaultValues["BOT_USER"]),
 		"DISCORD_JOIN_URL": os.Getenv("DISCORD_JOIN_URL"),
+		"WEBSITE_REPO":     websiteRepo(),
 	}
 }
 
 var defaultValues = map[string]string{
-	"BOT_USER": "helpbot",
+	"BOT_USER":     "helpbot",
+	"WEBSITE_REPO": "$COURSE.github.io",
 }

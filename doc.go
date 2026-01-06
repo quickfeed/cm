@@ -50,6 +50,7 @@
 //	COURSE - Course code (e.g., dat520)
 //	NAME - Course name (e.g., "Distributed Systems")
 //	COURSE_ORG - GitHub organization (defaults to COURSE-YEAR)
+//	WEBSITE_REPO - Website repository name (defaults to COURSE.github.io)
 //	BOT_USER - Help bot username (defaults to "helpbot")
 //	DISCORD_JOIN_URL - Discord server join URL (optional)
 //
@@ -60,13 +61,13 @@
 //	<course-repo>/           # Main course repository
 //	├── .env                 # Environment variables
 //	├── assignments/         # Assignment templates
-//	├── info/                # Course information
 //	├── tests/               # Test files
+//	├── website/             # Course website content
 //	└── <year>/              # Year-specific repositories
 //	    ├── assignments/     # Published assignments
-//	    ├── info/            # Published course info
+//	    ├── student-repos/   # Cloned student repositories
 //	    ├── tests/           # Published tests
-//	    └── student-repos/   # Cloned student repositories
+//	    └── <website-repo>/  # Published website (e.g., dat520.github.io)
 //
 // For more information, see the QuickFeed documentation.
 package main

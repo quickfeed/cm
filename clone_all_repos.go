@@ -42,7 +42,7 @@ func cloneAllRepos(_ []string) {
 	var wg sync.WaitGroup
 
 	for _, repo := range ghRepos {
-		// skipping the main course repository (assignments, info, tests)
+		// skipping the main course repository (assignments, website, tests)
 		if slices.Contains(courseRepos, repo.Name) {
 			continue
 		}

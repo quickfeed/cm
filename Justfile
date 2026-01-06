@@ -58,13 +58,13 @@ cm := "go tool -modfile=tools.mod cm"
     echo "  git commit"
     echo "  git push -u origin main"
 
-# Sync changes to the info repository.
-@info: && (msg "info")
-    echo "Syncing info repo to {{dest}}/info"
+# Sync changes to the website repository.
+@website: && (msg "website")
+    echo "Syncing website repo to {{dest}}/website"
     go mod tidy
-    {{rsync}} --filter='dir-merge /.rsync-filter-info' info/ {{dest}}/info
-    {{cm}} update-doc-tags -repo info
-    (cd {{dest}}/info && go mod tidy && git status)
+    {{rsync}} --filter='dir-merge /.rsync-filter-website' website/ {{dest}}/website
+    {{cm}} update-doc-tags -repo website
+    (cd {{dest}}/website && go mod tidy && git status)
 
 # Sync changes to the assignments repository.
 @assignments +lab: readme && (msg "assignments")
@@ -92,12 +92,12 @@ cm := "go tool -modfile=tools.mod cm"
     {{rsync}} --filter='dir-merge /.rsync-filter-tests' {{lab}} {{dest}}/tests
     (cd {{dest}}/tests && git status)
 
-# Sync changes from the per-year info repository back to the info directory.
-@back-info:
-    # Warning: This will overwrite some content in the info directory (use with caution)
+# Sync changes from the per-year website repository back to the website directory.
+@back-website:
+    # Warning: This will overwrite some content in the website directory (use with caution)
     # TODO: avoid overwriting files with placeholders like COURSE_ORG, COURSE_NAME etc.
-    echo "Syncing {{dest}}/info back to info"
-    {{bsync}} --filter='dir-merge /.rsync-filter-info' {{dest}}/info/ info
+    echo "Syncing {{dest}}/website back to website"
+    {{bsync}} --filter='dir-merge /.rsync-filter-website' {{dest}}/website/ website
     git status
 
 # Sync changes from the per-year assignments repository back to the lab folders.

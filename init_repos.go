@@ -7,9 +7,19 @@ import (
 )
 
 var (
-	courseRepos     = []string{"assignments", "info", "tests"}
+	courseRepos     = []string{"assignments", "website", "tests"}
 	assignmentsRepo = courseRepos[0]
 )
+
+// repoName returns the actual repository name for the given internal name.
+// This allows mapping internal names (like "website") to actual repository
+// names (like "dat520.github.io").
+func repoName(internalName string) string {
+	if internalName == "website" {
+		return websiteRepo()
+	}
+	return internalName
+}
 
 // initRepos initializes the course repositories so that they are
 // ready to be populated with data from the main course repository.
@@ -29,7 +39,8 @@ func initRepos(_ []string) {
 		if err := os.MkdirAll(path, os.ModePerm); err != nil {
 			exitErr(err, "Error creating repository directory")
 		}
-		if err := initGitRepository(path, courseOrg(), repo); err != nil {
+		actualRepoName := repoName(repo)
+		if err := initGitRepository(path, courseOrg(), actualRepoName); err != nil {
 			exitErr(err, "Error initializing git repository")
 		}
 	}

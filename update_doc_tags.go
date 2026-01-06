@@ -16,7 +16,7 @@ import (
 //
 // Run with the following command:
 //
-//	cm update-doc-tags -repo <assignments | tests | info>
+//	cm update-doc-tags -repo <assignments | tests | website>
 func updateDocTags(args []string) {
 	if err := loadEnv(); err != nil {
 		exitErr(err, "Error loading environment variables")
@@ -24,7 +24,7 @@ func updateDocTags(args []string) {
 
 	fs := flag.NewFlagSet(updateDocTagsCmd, flag.ExitOnError)
 	var repo string
-	fs.StringVar(&repo, "repo", "", "Repository name (one of: assignments | tests | info)")
+	fs.StringVar(&repo, "repo", "", "Repository name (one of: assignments | tests | website)")
 
 	if err := fs.Parse(args); err != nil {
 		exitErr(err, "Error parsing flags")

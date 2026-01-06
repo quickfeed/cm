@@ -36,7 +36,7 @@ func genReadme(_ []string) {
 	assignments := generateReadme(gitRoot, labs)
 
 	labPlan := mustExecute(parseTemplate("labplan", labPlanTemplate), assignments)
-	err = os.WriteFile(filepath.Join(gitRoot, "info", "lab-plan.md"), []byte(labPlan), 0o644)
+	err = os.WriteFile(filepath.Join(gitRoot, "website", "lab-plan.md"), []byte(labPlan), 0o644)
 	if err != nil {
 		exitErr(err, "Error writing lab-plan.md")
 	}

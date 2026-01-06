@@ -40,7 +40,7 @@ func getCommands() map[string]Command {
 			Function:    initEnv,
 		},
 		initReposCmd: {
-			Description: "Initialize course repositories (assignments, info, tests)",
+			Description: "Initialize course repositories (assignments, website, tests)",
 			FlagUsage:   "",
 			Function:    initRepos,
 		},
@@ -61,7 +61,7 @@ func getCommands() map[string]Command {
 		},
 		updateDocTagsCmd: {
 			Description: "Update documentation tags in markdown files",
-			FlagUsage:   "-repo <assignments|tests|info>",
+			FlagUsage:   "-repo <assignments|tests|website>",
 			Function:    updateDocTags,
 		},
 		removeSolutionTagsCmd: {
