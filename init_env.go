@@ -200,6 +200,7 @@ func websiteRepo() string {
 
 func replacements() map[string]string {
 	return map[string]string{
+		"COURSE_CODE":      course(),
 		"COURSE_NAME":      name(),
 		"COURSE_ORG":       courseOrg(),
 		"BOT_USER":         cmp.Or(os.Getenv("BOT_USER"), defaultValues["BOT_USER"]),
