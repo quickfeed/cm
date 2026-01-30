@@ -6,121 +6,48 @@ The `cm` (course management) tool is a command-line utility designed for QuickFe
 
 - [Installation](#installation)
 - [Prerequisites](#prerequisites)
-- [Quick Start](#quick-start)
 - [Initial Setup](#initial-setup)
 - [Common Workflows](#common-workflows)
 - [Environment Variables](#environment-variables)
 - [Repository Structure](#repository-structure)
 - [Available Commands](#available-commands)
-- [Using Just Commands](#using-just-commands)
 - [Troubleshooting](#troubleshooting)
 
 ## Installation
 
-Before installing the `cm` tool, you need to configure the `GOPRIVATE` environment variable to access the private repository:
-
-```bash
-# Set GOPRIVATE to allow access to the cm repository
-export GOPRIVATE=github.com/quickfeed/cm
-
-# Add this to your shell configuration file (~/.bashrc, ~/.zshrc, etc.)
-echo 'export GOPRIVATE=github.com/quickfeed/cm' >> ~/.bashrc  # or ~/.zshrc
-```
-
-Then install the `cm` tool:
+To install the `cm` tool:
 
 ```bash
 go install github.com/quickfeed/cm@latest
 ```
 
-Alternatively, if you're working within a course repository, you can use the `just` command to set up the tool:
-
-```bash
-just setup
-```
-
-This creates a `tools.mod` file to manage the `cm` tool version separately from the main `go.mod` file.
-
 ## Prerequisites
 
-The following tools are required for working with course repositories:
+The following tools are required for working with the `cm` tool:
 
-- **Go** (1.21 or later) - for running the `cm` tool
+- **Go** (1.24 or later) - for running the `cm` tool
 - **GitHub CLI (`gh`)** - for GitHub authentication and API access
-- **Just** - for running automation recipes
-- **Tree** - for viewing directory structures
-- **golangci-lint** - for linting Go code (optional, for development)
-- **Protocol Buffers (`protobuf`)** - for certain course assignments (optional)
-
-You can install these tools on macOS using Homebrew:
-
-```bash
-brew install protobuf gh just tree golangci-lint
-```
-
-Or use the provided `just` command:
-
-```bash
-just tools
-```
-
-## Quick Start
-
-For course instructors setting up a new course:
-
-```bash
-# 1. Install prerequisites
-just tools
-
-# 2. Set up the cm tool
-just setup
-
-# 3. Create environment configuration
-just env
-
-# 4. Initialize course repositories
-just init
-```
 
 ## Initial Setup
 
-### Step 1: Set Up the cm Tool
-
-If you're starting with a new course repository:
-
-```bash
-# Set up cm tool with tools.mod file
-just setup
-```
-
-This command creates a `tools.mod` file for managing the `cm` tool separately.
-
-### Step 2: Create Environment Configuration
+### Step 1: Create Environment Configuration
 
 Initialize the `.env` file with your course information:
 
 ```bash
-# Using the cm tool directly
 cm init-env -year 2025 -course dat520 -name "Distributed Systems"
-
-# Or using just
-just env  # Edit the Justfile first to set your course details
 ```
 
 The `.env` file will contain required environment variables like `YEAR`, `COURSE`, `NAME`, and optionally `DISCORD_JOIN_URL` and `BOT_USER`.
 
 **Important:** Commit the `.env` file to your repository and update it as needed for your course.
 
-### Step 3: Initialize Course Repositories
+### Step 2: Initialize Course Repositories
 
 Create the necessary course repositories on GitHub:
 
 ```bash
-# Using the cm tool
 cm init-repos
-
-# Or using just
-just init
 ```
 
 This will create three repositories in your course organization:
@@ -163,22 +90,6 @@ cm gen-tests-json -labs lab1
 cm update-doc-tags -repo assignments
 ```
 
-### Syncing Changes Using Just
-
-```bash
-# Update README files for all labs
-just readme
-
-# Sync changes to the info repository
-just info
-
-# Sync changes to assignments (specify lab folders)
-just assignments lab1 lab2
-
-# Sync changes to tests (specify lab folders)
-just tests lab1 lab2
-```
-
 ## Environment Variables
 
 The `cm` tool uses environment variables stored in a `.env` file in the repository root. These are typically set up using the `cm init-env` command:
@@ -191,9 +102,6 @@ The `cm` tool uses environment variables stored in a `.env` file in the reposito
 | `COURSE_ORG` | GitHub organization name | No | `{COURSE}-{YEAR}` |
 | `BOT_USER` | Help bot username | No | `helpbot` |
 | `DISCORD_JOIN_URL` | Discord server join URL | No | - |
-| `GOPRIVATE` | Go private module configuration | Auto-set | `github.com/quickfeed/cm` |
-
-The `GOPRIVATE` variable is automatically added to your `.env` file when you run `cm init-env`.
 
 ## Repository Structure
 
@@ -202,8 +110,6 @@ The `cm` tool expects a specific repository structure:
 ```
 <course-repo>/           # Main course repository (internal)
 ├── .env                 # Environment variables
-├── Justfile             # Automation recipes
-├── tools.mod            # Go tools configuration
 ├── assignments/         # Assignment templates
 ├── info/                # Course information templates
 ├── tests/               # Test file templates
@@ -255,55 +161,7 @@ cm gen-tests-json -labs "lab1 lab2 lab3"
 cm update-doc-tags -repo assignments
 ```
 
-## Using Just Commands
-
-The `Justfile` provides convenient recipes for common tasks. Use `just --list` to see all available commands.
-
-### Common Just Recipes
-
-| Recipe | Description |
-|--------|-------------|
-| `just setup` | Set up the cm tool using tools.mod |
-| `just update-cm` | Update the cm tool to the latest version |
-| `just tools` | Install required tools (macOS/Homebrew) |
-| `just env` | Create .env file (edit Justfile first) |
-| `just init` | Initialize course repositories |
-| `just readme` | Update README.md files for all labs |
-| `just clone` | Clone your personal labs repository |
-| `just info` | Sync changes to info repository |
-| `just assignments lab1` | Sync changes to assignments for lab1 |
-| `just tests lab1` | Sync changes to tests for lab1 |
-
-### Workflow Example
-
-```bash
-# Initial setup
-just setup
-just env
-just init
-
-# Working with assignments
-just readme
-just assignments lab1 lab2
-just tests lab1 lab2
-
-# Sync course information
-just info
-```
-
 ## Troubleshooting
-
-### GOPRIVATE Not Set
-
-If you get errors about accessing the private repository:
-
-```bash
-# Ensure GOPRIVATE is set
-export GOPRIVATE=github.com/quickfeed/cm
-
-# Add to your shell configuration
-echo 'export GOPRIVATE=github.com/quickfeed/cm' >> ~/.zshrc  # or ~/.bashrc
-```
 
 ### GitHub Authentication
 
@@ -338,11 +196,7 @@ If you get permission errors when initializing repositories, ensure:
 To update to the latest version of the cm tool:
 
 ```bash
-# Update using just
-just update-cm
-
-# Or update manually
-go get -tool -modfile=tools.mod github.com/quickfeed/cm@latest
+go install github.com/quickfeed/cm@latest
 ```
 
 ---
