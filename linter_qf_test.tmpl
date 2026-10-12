@@ -21,47 +21,47 @@ func init() {
 }
 
 func Test0Formatting(t *testing.T) {
-	sc := scores.Max()
-	defer sc.Print(t)
+	sc := scores.Max(t)
+	defer sc.Recover()
 
-	run(t, sc, "golangci-lint fmt --diff-colored --enable gofmt",
+	run(sc, "golangci-lint fmt --diff-colored --enable gofmt",
 		"Formatting checker failed: please configure your editor to format code on save")
 }
 
 func Test0TODOItems(t *testing.T) {
-	sc := scores.Max()
-	defer sc.Print(t)
+	sc := scores.Max(t)
+	defer sc.Recover()
 
-	run(t, sc, "golangci-lint run --tests=false --show-stats=false --allow-parallel-runners --enable-only godox",
+	run(sc, "golangci-lint run --tests=false --show-stats=false --allow-parallel-runners --enable-only godox",
 		"TODO checker failed: TODO comments must be removed when a task has been completed")
 }
 
 func Test0Lint(t *testing.T) {
-	sc := scores.Max()
-	defer sc.Print(t)
+	sc := scores.Max(t)
+	defer sc.Recover()
 
-	run(t, sc, "golangci-lint run --show-stats=false --allow-parallel-runners --disable errcheck", "Lint checker failed")
+	run(sc, "golangci-lint run --show-stats=false --allow-parallel-runners --disable errcheck", "Lint checker failed")
 }
 
 func Test0VetCheck(t *testing.T) {
-	sc := scores.Max()
-	defer sc.Print(t)
+	sc := scores.Max(t)
+	defer sc.Recover()
 
-	run(t, sc, "go vet ./...", "Vet checker failed")
+	run(sc, "go vet ./...", "Vet checker failed")
 }
 
-func run(t *testing.T, sc *score.Score, cmd, msg string) {
-	t.Parallel()
+func run(sc *score.T, cmd, msg string) {
+	sc.Parallel()
 	if sh.RunningWithSolution() && strings.HasPrefix(cmd, "golangci-lint run") {
 		cmd = fmt.Sprintf("%s --build-tags=solution", cmd)
 	}
 	s, err := sh.Output(cmd)
 	if err != nil {
-		t.Error(err)
+		sc.Error(err)
 	}
 	if s != "" {
 		sc.Dec()
-		t.Error(msg)
+		sc.Error(msg)
 		fmt.Println(s)
 	}
 }
